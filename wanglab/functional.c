@@ -36,16 +36,19 @@ void main()
     scanf("%c", &function);
     scanf("%s", &inputnum[0]);
 
-    resultbuf = atof(inputnum);
+    inputnum = tri(function, atof(inputnum))
+    resultbuf = inputnum;
     result = 0 + resultbuf;
 
     while(1)
     {
         printf(">>> ");
         scanf("%*c%c", &code);   // '\n' を変数に代入しない。
+        scanf("%c", &function);
         scanf("%s", &inputnum[0]);
 
-        resultbuf = atof(inputnum); //文字列を
+        inputnum = tri(function, atof(inputnum));
+        resultbuf = inputnum;
 
         switch(code)
         {
