@@ -167,5 +167,15 @@ void main()
     printf("Final Answer : %f\n", result);
 }
 
+/// Special Thanks
+/// # 21C1134 Yuto Yamaguchi
+
 /// Reference
-/// https://qiita.com/nogtk_/items/eb09ebc10f55590ba513
+/// # https://wwws.kobe-c.ac.jp/deguchi/c/string.html
+/// # https://marycore.jp/coding/math-nan/
+/// # https://marycore.jp/coding/math-inf/
+
+/// # http://simd.jugem.jp/?eid=29
+
+/// # https://qiita.com/nogtk_/items/eb09ebc10f55590ba513
+
