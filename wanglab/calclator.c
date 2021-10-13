@@ -3,8 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <math.h>
 
-bool arithmeticmode = true;
+bool arithmeticmode = true, quiet = false;
 
 double tri(char function, double inputnum)
 {
@@ -25,16 +26,34 @@ double tri(char function, double inputnum)
     }
 }
 
-void arith()
+void arith(double *result)
 {
     char code, inputnum[1024];
-    double result, resultbuf;
-    bool breaking = false;
+    double resultbuf;
+
+    printf("arithmetic mode\n");
     
     while(1)
     {
+Arimore:
         printf(">>> ");
         scanf("%*c%c", &code);   // '\n' を変数に代入しない。
+
+        switch(code)
+        {
+            case 'q':
+                quiet = true;
+                break;
+            case 'a':
+                printf("すでに四則演算モードです。\n\n");
+                goto Arimore;
+                break;
+            case 'f':
+                arithmeticmode = false;
+                break;
+        }
+        if(!arithmeticmode || quiet) break;
+
         scanf("%s", &inputnum[0]);
 
         resultbuf = atof(inputnum); //文字列を
@@ -42,43 +61,54 @@ void arith()
         switch(code)
         {
             case '+':
-                result += resultbuf;
+                *result += resultbuf;
                 break;
             case '-':
-                result -= resultbuf;
+                *result -= resultbuf;
                 break;
             case '*':
-                result *= resultbuf;
+                *result *= resultbuf;
                 break;
             case '/':
-                result /= resultbuf;
-                break;
-            case 'q':
-                breaking = true;
-                break;
-            case 'a':
-                printf("すでに四則演算モードです。\n\n");
-                break;
-            case 'f':
-                arithmeticmode = false;
+                *result /= resultbuf;
                 break;
             default:
                 printf("そんな符号または演算子はありません。ヘルプは '?' で表示できます。\n\n");
                 break;
         }
 
-        if(breaking) break;
 
-        printf("Middle Answer : %f\n", result);
+        printf("Middle Answer : %f\n", *result);
     }
 }
 
-void funct()
+void funct(double *result)
 {
-        while(1)
+    char code, function, inputnum[1024];
+    double resultbuf;
+
+    printf("functional mode\n");
+
+    while(1)
     {
+Funmore:
         printf(">>> ");
         scanf("%*c%c", &code);   // '\n' を変数に代入しない。
+
+        switch(code)
+        {
+            case 'a':
+                arithmeticmode = true;
+                break;
+            case 'f':
+                printf("すでに三角関数演算モードです。\n\n");
+                goto Funmore;
+                break;
+            case 'q':
+                quiet = true;
+                break;
+        }
+
         scanf("%c", &function);
         scanf("%s", &inputnum[0]);
 
@@ -87,65 +117,54 @@ void funct()
         switch(code)
         {
             case '+':
-                result += resultbuf;
+                *result += resultbuf;
                 break;
             case '-':
-                result -= resultbuf;
+                *result -= resultbuf;
                 break;
             case '*':
-                result *= resultbuf;
+                *result *= resultbuf;
                 break;
             case '/':
-                result /= resultbuf;
-                break;
-            case 'q':
-                breaking = true;
+                *result /= resultbuf;
                 break;
             default:
                 printf("そんな符号または演算子はありません。ヘルプは '?' で表示できます。\n\n");
                 break;
         }
 
-        if(breaking) break;
+        if(arithmeticmode || quiet) break;
 
-        printf("Middle Answer : %f\n", result);
+        printf("Middle Answer : %f\n", *result);
     }
 }
 
 void main()
 {
-    char code;
-    char function;
-    char inputnum[1024];
+    char code, function, inputnum[1024];
     double result, resultbuf;
     bool breaking = false;
-    bool arithmeticmode = true;
 
     printf("calclator.c\n");
 
     // 一周目の処理
+    printf("arithmetic mode\n");
     printf(">>> ");
     scanf("%s", &inputnum[0]);
 
-    resultbuf = atof(inputnum);
-    result = 0 + resultbuf;
+    resultbuf = atof(inputnum); // 初期値の入力
+    result = 0 + resultbuf; // 結果の値の初期化
 
     while(1)
     {
-Default:
-        switch(arithmeticmode)
-        {
-            case true:
-                arith();
-                break;
-            case false:
-                funct();
-                break;
-            default:
-                goto(Default);
-                break;
-        }
+        if(arithmeticmode)
+            arith(&result);
+        else
+            funct(&result);
+        if(quiet) break;
     }
+
+    printf("Final Answer : %f\n", result);
 }
 
 /// Reference
