@@ -9,7 +9,7 @@ void main()
     double result, resultbuf;
     bool breaking = false;
 
-    printf("functional.c\n");
+    printf("arithmetic.c\n");
 
     /// 一周目の処理
     printf(">>> ");

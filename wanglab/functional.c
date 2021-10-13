@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <math.h>
 
 double tri(char function, double inputnum)
 {
@@ -36,8 +37,7 @@ void main()
     scanf("%c", &function);
     scanf("%s", &inputnum[0]);
 
-    inputnum = tri(function, atof(inputnum))
-    resultbuf = inputnum;
+    resultbuf = tri(function, atof(inputnum));
     result = 0 + resultbuf;
 
     while(1)
@@ -47,8 +47,7 @@ void main()
         scanf("%c", &function);
         scanf("%s", &inputnum[0]);
 
-        inputnum = tri(function, atof(inputnum));
-        resultbuf = inputnum;
+        resultbuf = tri(function, atof(inputnum));
 
         switch(code)
         {
@@ -79,69 +78,6 @@ void main()
 
     printf("Final Answer : %f\n", result);
 }
-
-// オープニングの表示
-/*
-    仕様決定
-    a を押すか f を押すかでモードの切り替えができる。
-    q を押したら電卓を終了する。
-
-    工夫点
-    計算結果を符号・整数部分・小数部分の三つに分けることで多少大きな桁数を扱うことができるようにする。
-    
-    必要な処理
-    入力した文字が数字か文字か判断する関数
-    主要計算処理
-*/
-
-/*
-    scanf("%c", &code);
-    scanf("%c", &fname);
-    scanf("%ld", &inputnum);
-
-    switch(fname)
-    {
-        case 's':
-        case 'S':
-        resultbuf = sin(inputnum);
-        break;
-        case 'c':
-        case 'C':
-        resultbuf = cos(inputnum);
-        break;
-        case 't':
-        case 'T':
-        resultbuf = tan(inputnum);
-        break;
-        default:
-        printf("そんな関数はありません。ヘルプは '?' で表示できます。\n\n");
-        break;
-    }
-
-    switch(code)
-    {
-        case '+':
-        result += reslutbuf;
-        break;
-        case '-':
-        result -= reslutbuf;
-        break;
-        case '*':
-        result *= reslutbuf;
-        break;
-        case '/':
-        result /= reslutbuf;
-        break;
-        default:
-        printf("そんな符号または演算子はありません。ヘルプは '?' で表示できます。\n\n");
-        break;
-    }
-
-    if(nowmode == 'a')
-        nowmode = 'f';
-    else if(nowmode == 'f')
-        nowmode = 'a';
-*/
 
 /// Special Thanks
 /// # 21C1134 Yuto Yamaguchi

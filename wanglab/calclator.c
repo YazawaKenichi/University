@@ -2,79 +2,151 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>    // You can use boolean object.
-#include <string.h>
-#include <math.h>
+#include <stdbool.h>
 
-#define DEBUGMODE 1
-#define PI M_PI
+bool arithmeticmode = true;
 
-void input(*stringpointer)    // 何文字入力されても最初の一文字だけ取り出す関数
+double tri(char function, double inputnum)
 {
-    scanf("%s", stringpointer);
+    switch(function)
+    {
+        case 's':
+        case 'S':
+            return sin(inputnum * M_PI / 180);
+        case 'c':
+        case 'C':
+            return cos(inputnum * M_PI / 180);
+        case 't':
+        case 'T':
+            return tan(inputnum * M_PI / 180);
+        default:
+            printf("そんな関数またはコマンドはありません。ヘルプは '?' で表示できます。\n\n");
+        break;
+    }
 }
 
-void majorprocess(*charactor)  // 主要処理 // 入力された文字列に応じて四則演算・関数演算を行う関数
+void arith()
 {
-    bool arithmeticmode;  // 1byte 変数にモードを書き込んでいく   // 詳細はプログラム下部 "詳細" 参照
-    if(arithmeticmode)
+    char code, inputnum[1024];
+    double result, resultbuf;
+    bool breaking = false;
+    
+    while(1)
     {
-        // 四則演算
-        arithmetic();
+        printf(">>> ");
+        scanf("%*c%c", &code);   // '\n' を変数に代入しない。
+        scanf("%s", &inputnum[0]);
+
+        resultbuf = atof(inputnum); //文字列を
+
+        switch(code)
+        {
+            case '+':
+                result += resultbuf;
+                break;
+            case '-':
+                result -= resultbuf;
+                break;
+            case '*':
+                result *= resultbuf;
+                break;
+            case '/':
+                result /= resultbuf;
+                break;
+            case 'q':
+                breaking = true;
+                break;
+            case 'a':
+                printf("すでに四則演算モードです。\n\n");
+                break;
+            case 'f':
+                arithmeticmode = false;
+                break;
+            default:
+                printf("そんな符号または演算子はありません。ヘルプは '?' で表示できます。\n\n");
+                break;
+        }
+
+        if(breaking) break;
+
+        printf("Middle Answer : %f\n", result);
     }
-    else
+}
+
+void funct()
+{
+        while(1)
     {
-        // 関数演算
-        function();
+        printf(">>> ");
+        scanf("%*c%c", &code);   // '\n' を変数に代入しない。
+        scanf("%c", &function);
+        scanf("%s", &inputnum[0]);
+
+        resultbuf = tri(function, atof(inputnum));
+
+        switch(code)
+        {
+            case '+':
+                result += resultbuf;
+                break;
+            case '-':
+                result -= resultbuf;
+                break;
+            case '*':
+                result *= resultbuf;
+                break;
+            case '/':
+                result /= resultbuf;
+                break;
+            case 'q':
+                breaking = true;
+                break;
+            default:
+                printf("そんな符号または演算子はありません。ヘルプは '?' で表示できます。\n\n");
+                break;
+        }
+
+        if(breaking) break;
+
+        printf("Middle Answer : %f\n", result);
     }
 }
 
 void main()
 {
-    char charactor = '\0';  // この変数いらないかも
-    char string[1023] = {'\0'}; // 入力された文字列を格納する
-    char code = '+';    // 符号を格納する
-    unsigned long long int resultint = 0;   // 整数部分を格納する    // 32bit OS 対応
-    unsigned long long double resultdouble = 0; // 小数部分を格納する   // 32bit OS 対応
+    char code;
+    char function;
+    char inputnum[1024];
+    double result, resultbuf;
+    bool breaking = false;
+    bool arithmeticmode = true;
+
+    printf("calclator.c\n");
+
+    // 一周目の処理
+    printf(">>> ");
+    scanf("%s", &inputnum[0]);
+
+    resultbuf = atof(inputnum);
+    result = 0 + resultbuf;
 
     while(1)
     {
-        // 入力を受け付ける
-        input(&string[0]);
-        // 入力文字の解析とそれに応じた必要な処理
-        major(&string[0]);
+Default:
+        switch(arithmeticmode)
+        {
+            case true:
+                arith();
+                break;
+            case false:
+                funct();
+                break;
+            default:
+                goto(Default);
+                break;
+        }
     }
 }
 
-/*
-    目標
-    マルチモードの作成ができる。
-    i.e.) 四則演算モード・関数演算モードの入れ替えをしてほしい。
-
-    仕様決定
-    'a' を押すか 'f' を押すかでモードの切り替えができる。
-    'q' を押したら電卓を終了する。
-
-    工夫点
-    計算結果を、符号・整数部分・小数部分の三つに分けることで多少大きな桁数を扱うことができるようにする。
-
-    必要な処理
-    入力した文字が数字か文字かを判断する関数。
-    主要計算処理
-*/
-
-/*
-    詳細
-*/
-
-/*
-    wang memo
-    scanf("%c", &sw);
-    while(sw == \n);
-        scanf("%c",&sw);
-*/
-
-/// Special Thanks: 21C1134 Yuto Yamaguchi
-
 /// Reference
-/// https://kaworu.jpn.org/c/bool
+/// https://qiita.com/nogtk_/items/eb09ebc10f55590ba513
