@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <ctype.h>
 #include <math.h>
 
 // ＣＡＳＩ○ っぽいアスキーアート
@@ -26,7 +27,9 @@
 #define RED "\033[31m"  // 文字色を赤くする
 #define YELLOW "\033[33m"   // 文字色を黄色にする
 #define GREEN "\033[32m"    //文字色を緑にする
+#define DELETE "\033[0K"    // 行中右側の文字列を消去
 
+#define OMAKE 0 // おまけプログラムもコンパイルする時 1
 #define DEBUGMODE 0 // デバッグする時 1
 
 unsigned static const char INPUTERROR = 0;  // 不適切な入力
@@ -77,9 +80,9 @@ void printl()   // ロゴの出力
 
 bool printh(unsigned char place) // ヘルプを表示し、その後 true を返す関数   // skip = printh(PLACE) とすることで、ヘルプの表示と同時に skip を ture にできる
 {
-    arithstr[] = "\n\t四則演算モード。\n\n演算する際は基本的に１項づつ Enter で区切って入力してください。\n\t演算子の紹介\n \'+\' : 和\n \'-\' : 差\n \'*\' : 積\n \'/\' : 商\n";
-    functstr[] = "\n\t関数演算モード。\n\n演算する際は基本的に１項づつ Enter で区切って入力してください。\n\t演算子の紹介\n \'+\' : 和\n \'-\' : 差\n \'*\' : 積\n \'/\' : 商\n\t関数の紹介\n \'s\' : 正弦\n \'c\' : 余弦\n \'t\' : 正接\n ※角度は度数法。";
-    modeselect[] = "\'a\' を入力で四則演算モード\n\'f\' を入力で関数演算モード\n\n\n";
+    char arithstr[] = "\n\t四則演算モード。\n\n演算する際は基本的に１項づつ Enter で区切って入力してください。\n\t演算子の紹介\n '+' : 和\n '-' : 差\n '*' : 積\n '/' : 商\n";
+    char functstr[] = "\n\t関数演算モード。\n\n演算する際は基本的に１項づつ Enter で区切って入力してください。\n\t演算子の紹介\n '+' : 和\n '-' : 差\n '*' : 積\n '/' : 商\n\t関数の紹介\n 's' : 正弦\n 'c' : 余弦\n 't' : 正接\n ※角度は度数法。";
+    char selectmode[] = "\n'a' を入力で四則演算モード\n'f' を入力で関数演算モード\n\n\n";
 
     switch(place)
     {
@@ -96,15 +99,15 @@ bool printh(unsigned char place) // ヘルプを表示し、その後 true を�
             return true;
             break;
         case 3:
-            printf(modeselect);
+            printf(selectmode);
             return true;
             break;
         case 4:
-            printyellow("\n既に四則演算モードです。ヘルプは \'?\' で表示できます。\n\n");
+            printyellow("\n既に四則演算モードです。ヘルプは '?' で表示できます。\n\n");
             return true;
             break;
         case 5:
-            printyellow("\n既に関数演算モードです。ヘルプは \'?\' で表示できます。\n\n");
+            printyellow("\n既に関数演算モードです。ヘルプは '?' で表示できます。\n\n");
             return true;
             break;
         default:
@@ -292,6 +295,7 @@ bool funct(bool *quiet)
     }
 }
 
+#if OMAKE
 // 未完成
 void make()
 {
@@ -338,6 +342,7 @@ void malware()
         }
     }
 }
+#endif
 
 // 未完成
 void quiet()
@@ -359,41 +364,42 @@ void help()
     printf("Help\n");
 }
 
-bool input()  // 数列を入力させる関数。入力成功が true。
+// 完成しているか吟味する必要がある
+bool input(long double *ptr)  // 数列を入力させる関数。入力成功が true。
 {
-    char inputnum[0];
-    scanf("%s", &inputnum[0]);
-    for(int i = 0; i <= sizeof(inputnum) / sizeof(char); i++) // 脳筋で文字列が数列かどうかを判断する。
+    char inputstr[1024];
+    printf("\r>>> ");
+    printf(DELETE);
+    scanf("%s", &inputstr[0]);
+    for(int i = 0; i <= sizeof(inputstr) / sizeof(char); i++)
     {
-        if(!('0' <= inputnum[i] && inputnum[i] <= '9'))
-        {
-            switch(inputnum[i])
-            {
-                case '\n':
-                case '\0':
-                    break;
-                default:
-                    return false;
-                    break;
-            }
-        }
+        if(!isdigit(inputstr[i]) && (inputstr[i] != '.' || inputstr[i] != '\n' || inputstr[i] != '\0')) // 数字じゃないし、return でもないし、NULL でもない時
+            return false;
     }
-    result = atof(inputnum);
+    *ptr = atof(inputstr);
     return true;
 }
 
+// 完成しているか吟味する必要がある
 bool inita() // 入力失敗で false
 {
     bool success = false;
     printf("arithmeticmode\n");
-    printf(">>> ");
-    return input();
+    while(!success)
+    {
+        printf(">>> ");
+        success = input(&result);
+        printd("in while");
+    }
+    printd("input SUCCESS!");
+    return success;
 }
 
+// こっちも完成しているか吟味する必要がある
 bool initf() // 入力失敗で false
 {
     char function;
-    double resultbuf;
+    long double resultbuf;
     printf("functionalmode\n");
     printf(">>> ");
     scanf("%c", &function);
@@ -401,17 +407,17 @@ bool initf() // 入力失敗で false
     {
         case 's':
         case 'S':
-            input(resultbuf);
+            input(&resultbuf);
             result = sin(resultbuf * M_PI / 180);
             break;
         case 'c':
         case 'C':
-            input(resultbuf);
+            input(&resultbuf);
             result = cos(resultbuf * M_PI / 180);
             break;
         case 't':
         case 'T':
-            input(resultbuf);
+            input(&resultbuf);
             result = tan(resultbuf * M_PI / 180);
             break;
         default:
@@ -421,7 +427,7 @@ bool initf() // 入力失敗で false
     return true;
 }
 
-bool init(bool arithmeticmode) // 初期化成功で true 失敗で false
+bool init(bool *arithmeticmode) // 初期化成功で true 失敗で false
 {
     bool skip = false;
     char code = '\0';
@@ -439,11 +445,16 @@ bool init(bool arithmeticmode) // 初期化成功で true 失敗で false
             printf("%d", skip);
             printf(EX);
 #endif
-            arithmeticmode = true;
+            *arithmeticmode = true;
             break;
         case 'f':
             skip = !initf();
-            arithmeticmode = false;
+#if DEBUGMODE
+            printf(GREEN);
+            printf("%d", skip);
+            printf(EX);
+#endif
+            *arithmeticmode = false;
             break;
         default:
             return false;
@@ -457,7 +468,7 @@ bool finalize(bool *quiet, bool *end) // 入力成功で true を返す。
 {
     char inputstr[8];
     printf("\n\n他の計算をしますか？ [Y/N] > ");
-    scanf("%s", &inputstr[0]);
+    scanf("%s", inputstr);
     switch(inputstr[0])
     {
         case 'Y':
