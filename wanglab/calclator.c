@@ -1,47 +1,10 @@
-// 64bit OS を想定。-lm 必須。
+// 64bit OS を想定。-lm 必須。ANSI エスケープシーケンスを使用。
 
-/*
-    課題
-    arithmeticmode になってから a を入力すると mode >>> がいくつも表示されやがる。
-*/
+#include "calclator.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <unistd.h>
-#include <ctype.h>
-#include <math.h>
+#define DEBUGMODE 1
 
-// ＣＡＳＩ○ っぽいアスキーアート
-#define GASHIO0 "  _____          _____  _____ ____  \n"
-#define GASHIO1 " / ____|   /\\   / ____||_   _/ __ \\ \n"
-#define GASHIO2 "| |  __   /  \\  | (___   | || |  | |\n"
-#define GASHIO3 "| | |_ | / /\\ \\  \\___ \\  | || |  | |\n"
-#define GASHIO4 "| |__| |/ ____ \\ ____) |_| || |__| |\n"
-#define GASHIO5 " \\_____/_/    \\_\\_____/|_____\\____/ \n"
-
-#define CLS "\033[2J"   // 画面を消去する
-#define SCROLL "\033[1S"    // 一行分スクロールする
-#define HIDDEN "\033[0m" // 次からの文字列を隠す
-#define EX "\033[39m"    // 次から文字の装飾をなくす
-#define RED "\033[31m"  // 文字色を赤くする
-#define YELLOW "\033[33m"   // 文字色を黄色にする
-#define GREEN "\033[32m"    //文字色を緑にする
-#define DELETE "\033[0K"    // 行中右側の文字列を消去
-
-#define OMAKE 0 // おまけプログラムもコンパイルする時 1
-#define DEBUGMODE 0 // デバッグする時 1
-
-unsigned static const char INPUTERROR = 0;  // 不適切な入力
-unsigned static const char ARITHMETIC = 1;  // 四則演算のヘルプ
-unsigned static const char FUNCTIONAL = 2;  // 関数演算のヘルプ
-unsigned static const char MODESELECT = 3;  // モード選択のヘルプ
-unsigned static const char ALREADYARI = 4;  // 既に四則演算
-unsigned static const char ALREADYFUN = 5;  // 既に関数演算
-
-unsigned char count = 0;
-long double result;
-
+/*** 文字列出力系関数 ***/
 void printred(char *str)    // 赤文字で表示するだけの関数   // プログラム上で想定されていない処理エラー用
 {
     printf(RED);
@@ -58,11 +21,24 @@ void printyellow(char *str)    // 黄文字で表示するだけの関数    // 
     printf(EX);
 }
 
+void printcyan(char *str)
+{
+    printf(CYAN);
+    printf("%s", str);
+    printf(EX);
+}
+
 void printd(char *str)  // 緑文字で表示するだけの関数   // debug 時の出力用
 {
     printf(GREEN);
     printf("%s", str);
     printf(EX);
+}
+
+void printi()   // 入力を促す矢印を表示する関数
+{
+    printf("\r>>> ");
+    printf(DELETE);
 }
 
 void printl()   // ロゴの出力
@@ -78,35 +54,35 @@ void printl()   // ロゴの出力
     printf(CLS);
 }
 
-bool printh(unsigned char place) // ヘルプを表示し、その後 true を返す関数   // skip = printh(PLACE) とすることで、ヘルプの表示と同時に skip を ture にできる
+bool printh(helptag place) // ヘルプを表示し、その後 true を返す関数   // skip = printh(PLACE) とすることで、ヘルプの表示と同時に skip を ture にできる
 {
-    char arithstr[] = "\n\t四則演算モード。\n\n演算する際は基本的に１項づつ Enter で区切って入力してください。\n\t演算子の紹介\n '+' : 和\n '-' : 差\n '*' : 積\n '/' : 商\n";
-    char functstr[] = "\n\t関数演算モード。\n\n演算する際は基本的に１項づつ Enter で区切って入力してください。\n\t演算子の紹介\n '+' : 和\n '-' : 差\n '*' : 積\n '/' : 商\n\t関数の紹介\n 's' : 正弦\n 'c' : 余弦\n 't' : 正接\n ※角度は度数法。";
-    char selectmode[] = "\n'a' を入力で四則演算モード\n'f' を入力で関数演算モード\n\n\n";
+    char arithstr[] = "\n\t四則演算モード\n\n演算する際は基本的に１項づつ Enter で区切って入力してください。\n\n\t演算子の紹介\n '+' : 和\n '-' : 差\n '*' : 積\n '/' : 商\n\n'f' を入力して関数演算モードに切り替えることが可能です。\n\n";
+    char functstr[] = "\n\t関数演算モード\n\n演算する際は基本的に１項づつ Enter で区切って入力してください。\n\n\t演算子の紹介\n '+' : 和\n '-' : 差\n '*' : 積\n '/' : 商\n\t関数の紹介\n 's' : 正弦\n 'c' : 余弦\n 't' : 正接\n ※角度は度数法。\n\n'a' を入力して四則演算モードに切り替えることが可能です。\n\n";
+    char selectmode[] = "\n'a' を入力で四則演算モード\n'f' を入力で関数演算モード\n\n";
 
     switch(place)
     {
-        case 0:
+        case INPUTERROR:
             printyellow("\n入力が不適切です。ヘルプは '?' で表示できます。\n\n");
             return true;
             break;
-        case 1:
-            printf(arithstr);
+        case ARITHMETIC:
+            printcyan(arithstr);
             return true;
             break;
-        case 2:
-            printf(functstr);
+        case FUNCTIONAL:
+            printcyan(functstr);
             return true;
             break;
-        case 3:
-            printf(selectmode);
+        case MODESELECT:
+            printcyan(selectmode);
             return true;
             break;
-        case 4:
+        case ALREADYARI:
             printyellow("\n既に四則演算モードです。ヘルプは '?' で表示できます。\n\n");
             return true;
             break;
-        case 5:
+        case ALREADYFUN:
             printyellow("\n既に関数演算モードです。ヘルプは '?' で表示できます。\n\n");
             return true;
             break;
@@ -117,15 +93,16 @@ bool printh(unsigned char place) // ヘルプを表示し、その後 true を�
     }
 }
 
-bool arith(bool *quiet)
+/*** 電卓機能関数 ***/
+bool arith(long double *result, bool *quiet, char *count)
 {
     char code, inputnum[1024];
-    double resultbuf;
+    long double resultbuf;
     bool skip = false;
 
-    if(count++ != 1)
+    if((*count)++ != 1)
         printf("arithmetic mode\n");
-    printf(">>> ");
+    printi();
     
     while(1)
     {
@@ -160,7 +137,7 @@ bool arith(bool *quiet)
                 printd("arith while switch case '?'\n");
 #endif
                 skip = printh(ARITHMETIC);
-                printf(">>> ");
+                printi();
                 break;
             case '\n':
                 skip = true;
@@ -179,21 +156,21 @@ bool arith(bool *quiet)
 #endif
             scanf("%s", &inputnum[0]);
 
-            resultbuf = atof(inputnum); //文字列を
+            resultbuf = atof(inputnum);
 
             switch(code)
             {
                 case '+':
-                    result += resultbuf;
+                    *result += resultbuf;
                     break;
                 case '-':
-                    result -= resultbuf;
+                    *result -= resultbuf;
                     break;
                 case '*':
-                    result *= resultbuf;
+                    *result *= resultbuf;
                     break;
                 case '/':
-                    result /= resultbuf;
+                    *result /= resultbuf;
                     break;
                 default:
                     skip = printh(INPUTERROR);
@@ -202,25 +179,25 @@ bool arith(bool *quiet)
 
             if(!skip)
             {
-                printf(" = %Lf\n>>> ", result);
+                printf(" = %Lf\n>>> ", *result);
                 skip = false;
             }
         }
     }
 }
 
-bool funct(bool *quiet)
+bool funct(long double *result, bool *quiet, char *count)
 {
     char code, function, inputnum[1024];
-    double resultbuf;
+    long double resultbuf;
     bool skip = false;
 
-    if(count++ != 1)
+    if((*count)++ != 1)
         printf("functional mode\n");
 
     while(1)
     {
-        printf(">>> ");
+        printi();
         scanf("%c", &code);
 
         switch(code)
@@ -272,16 +249,16 @@ bool funct(bool *quiet)
                 switch(code)
                 {
                     case '+':
-                        result += resultbuf;
+                        *result += resultbuf;
                         break;
                     case '-':
-                        result -= resultbuf;
+                        *result -= resultbuf;
                         break;
                     case '*':
-                        result *= resultbuf;
+                        *result *= resultbuf;
                         break;
                     case '/':
-                        result /= resultbuf;
+                        *result /= resultbuf;
                         break;
                     default:
                         skip = printh(INPUTERROR);
@@ -290,178 +267,225 @@ bool funct(bool *quiet)
             }
 
             if(!skip)
-                printf(" = %Lf\n", result);
+                printf(" = %Lf\n", *result);
         }
     }
 }
 
-#if OMAKE
-// 未完成
-void make()
-{
-    /*
-    ///    FILE *fopen(const char *filename, const char *mode);
-    ///    *mode は "a+" を指定することで ファイルの読み書きが可能。ファイルが存在しない場合は作成し、ファイルが存在する場合はファイルの末尾に文章を追加するモードで開く。
-    char filename[1024] = "繧ｳ繝槭Φ繝峨�繝ｭ繝ｳ繝励ヨ繧堤┌髯舌↓陦ｨ遉ｺ縺輔○繧九□縺代�繝励Ο繧ｰ繝ｩ繝�縲�.bat"   // filename
-    FILE *file;// FILE is defined in stdio.h as structure.
-    file = fopen(filename, "a+");
-    fprintf("@echo off\n");
-    fprintf("setlocal\n");
-    fprintf("cmd\n");
-    fprintf("endlocal\n");
-    while(1)
-    {
-    }
-    fclose(file);
-    */
-}
-
-// 未完成
-void malware()
-{
-    char input[16];
-
-    while(1)
-    {
-        printf("今からこのコンピュータにウィルスを作成します。\nよろしいですか？[Y/N] ");
-        printf(">>> ");
-        scanf("%s", &input[0]);
-        switch(input[0])
-        {
-            case 'Y':
-            case 'y':
-                printf("あなたには度胸があります。\n");
-                return ;
-                break;
-            case 'N':
-            case 'n':
-                printf("世の中そんなに甘くねぇよカス。\n");
-                make();
-                return ;
-                break;
-        }
-    }
-}
-#endif
-
-// 未完成
-void quiet()
-{
-    printf("プログラムを終了するには、何か一つキーを押してください...");
-    printf("\033[8mおっと、見つかってしまいましたか。\n");  // 8m is hidden. 0m is clear
-    printf("hogehoge\n");
-}
-
-// 未完成
-void endstep()
-{
-    printf("Endstep\n");
-}
-
-// 未完成
-void help()
-{
-    printf("Help\n");
-}
-
-// 完成しているか吟味する必要がある
-bool input(long double *ptr)  // 数列を入力させる関数。入力成功が true。
+/*** 補助関数 ***/
+bool inputnum(long double *ptr, bool *arithmeticmode)  // 数列を入力させる関数。入力成功が true。    // 数字を代入したい変数を引数に渡す。
 {
     char inputstr[1024];
-    printf("\r>>> ");
     printf(DELETE);
     scanf("%s", &inputstr[0]);
-    for(int i = 0; i <= sizeof(inputstr) / sizeof(char); i++)
+    for(int i = 0; inputstr[i] != '\0'; i++)   // inputstr の要素をすべてスキャンできるか、NULL が現れるまでスキャンし続ける。
     {
-        if(!isdigit(inputstr[i]) && (inputstr[i] != '.' || inputstr[i] != '\n' || inputstr[i] != '\0')) // 数字じゃないし、return でもないし、NULL でもない時
-            return false;
+#if DEBUGMODE
+        printf(GREEN);
+        switch(inputstr[i])
+        {
+            case '\0':
+                printf("inputstr[%d] = [NULL]\n", i);
+                break;
+            case '\n':
+                printf("inputstr[%d] = [ENTER]\n", i);
+                break;
+            default:
+                printf("inputstr[%d] = %c\n", i, inputstr[i]);
+                break;
+        }
+#endif
+        switch(inputstr[i])
+        {
+            case '.':
+            case '+':
+            case '-':
+                break;
+            case '?':
+                if(*arithmeticmode)
+                {
+                    printh(ARITHMETIC);
+                    return false;
+                }
+                else
+                {
+                    printh(FUNCTIONAL);
+                    return false;
+                }
+            case 'a':
+                if(*arithmeticmode)
+                {
+                    // 四則演算モード
+                    printh(ALREADYARI);
+                    return false;
+                }
+                else
+                {
+                    // 関数演算モード
+                    *arithmeticmode = true; // 関数演算モードで a が押された時
+                    return false;
+                }
+                break;
+            case 'f':
+                if(!(*arithmeticmode))
+                {
+                    // 関数演算モード
+                    printh(ALREADYFUN);
+                    return false;
+                }
+                else
+                {
+                    // 四則演算モード
+                    *arithmeticmode = true;    // 関数演算モードで f が押された時
+                    return false;
+                }
+                break;
+            default:     // 小数点 NULL 和 差 ←これらでないとき
+                if(!isdigit(inputstr[i]))   // 数字ですらない時
+                {
+                    printh(INPUTERROR);
+                    return false;
+                }
+                break;
+        }
+#if DEBUGMODE
+        printd("scanning str\n");
+#endif
     }
     *ptr = atof(inputstr);
+#if DEBUGMODE
+    printf(GREEN);
+    printf("atof(inputstr) = *ptr = %Lf\n", *ptr);
+    printf(EX);
+#endif
     return true;
 }
 
-// 完成しているか吟味する必要がある
-bool inita() // 入力失敗で false
+bool inputfunct(long double *result, bool *arithmeticmode)  // 関数を入力させる。成功で true  // 答えを引数に上書きする
 {
-    bool success = false;
-    printf("arithmeticmode\n");
-    while(!success)
-    {
-        printf(">>> ");
-        success = input(&result);
-        printd("in while");
-    }
-    printd("input SUCCESS!");
-    return success;
-}
-
-// こっちも完成しているか吟味する必要がある
-bool initf() // 入力失敗で false
-{
-    char function;
-    long double resultbuf;
-    printf("functionalmode\n");
-    printf(">>> ");
-    scanf("%c", &function);
-    switch(function)
+    bool skip = false, arithbuf = *arithmeticmode;
+    char funct;
+    long double num;
+    scanf("%c", &funct);
+    switch(funct)
     {
         case 's':
         case 'S':
-            input(&resultbuf);
-            result = sin(resultbuf * M_PI / 180);
+            skip = !inputnum(&num, &arithbuf);
+            *arithmeticmode = arithbuf;
+            if(!skip)
+                *result = sin(num * M_PI / 180);
             break;
         case 'c':
         case 'C':
-            input(&resultbuf);
-            result = cos(resultbuf * M_PI / 180);
+            skip = !inputnum(&num, &arithbuf);
+            *arithmeticmode = arithbuf;
+            if(!skip)
+                *result = cos(num * M_PI / 180);
             break;
         case 't':
         case 'T':
-            input(&resultbuf);
-            result = tan(resultbuf * M_PI / 180);
+            skip = !inputnum(&num, &arithbuf);
+            *arithmeticmode = arithbuf;
+            if(!skip)
+                *result = tan(num * M_PI / 180);
             break;
         default:
             return false;
             break;
     }
+}
+
+/*** シーケンス整理関数 ***/
+bool arithmeticinitializemethod() // 入力失敗で false
+{
+    printf("arithmeticmode\n");
+
+    bool success = false, aribuf = *arithmeticmode;
+    long double resultbuf = *result;
+
+    while(!success)
+    {
+#if DEBUGMODE
+        printd("arithmeticinitializemethod ");
+        printi();
+#else
+//        printd("↓行復帰しています");
+        printi();
+#endif
+        success = inputnum(&resultbuf, &aribuf);
+        if(success)
+            *result = resultbuf;
+        else
+        {
+            // arithmeticmode がへんかしたかどうかを読み取って、変化したら関数演算モードになるようにしむける
+            if(aribuf == *arithmeticmode)
+            {
+                // 失敗してかつモード変更を検出しなかった時の処理
+                printh(INPUTERROR);
+            }
+            else
+            {
+                // 失敗してかつモード変更が検出された時の処理
+                arithmeticmode = false;
+                return false;
+            }
+        }
+#if DEBUGMODE
+        printf(GREEN);
+        printf("success = %d\n", success);
+        printf(EX);
+#endif
+    }
+    return success;
+}
+
+bool functionalinitializemethod() // 入力失敗で false
+{
+    printf("functionalmode\n");
+
+    long double resultbuf;
+    bool catched = false, aribuf = *arithmeticmode;
+
+#if DEBUGMODE
+        printd("functionalinitializemethod ");
+        printf(">>> ");
+#else
+//        printd("↓行復帰しています\n");
+        printi();
+#endif
+    while(!catched)
+    {
+        catched = inputfunct(&resultbuf, &aribuf);
+        *arithmeticmode = aribuf;
+    }
+    *result = resultbuf;
     return true;
 }
 
-bool init(bool *arithmeticmode) // 初期化成功で true 失敗で false
+status init() // 初期化成功で true 失敗で false // result を書き換える
 {
-    bool skip = false;
-    char code = '\0';
-    // 一周目のモード入力とスイッチ
-    count = 1;  // defined as grobal
-    // 初期化するときに文字を入力するエラーに対処出来てない。
-    printf("mode >>> ");
-    scanf("%c", &code);
-    switch(code)
+    static ret;
+    printf("\rmode >>> ");
+    printf(DELETE);
+    scanf("%c", &mode);
+    switch(mode)
     {
         case 'a':
-            skip = !inita();
-#if DEBUGMODE
-            printf(GREEN);
-            printf("%d", skip);
-            printf(EX);
-#endif
-            *arithmeticmode = true;
+            ret = arithmeticinitializemethod();
             break;
         case 'f':
-            skip = !initf();
-#if DEBUGMODE
-            printf(GREEN);
-            printf("%d", skip);
-            printf(EX);
-#endif
-            *arithmeticmode = false;
+            ret = functionalinitializemethod();
+            break;
+        case '?':
+            printh(MODESELECT);
+            ret = AGAIN;
             break;
         default:
-            return false;
-            break;
+            ret = AGAIN;
     }
-    if(!skip) return true;
-    else return false;
+
+    return ret;
 }
 
 bool finalize(bool *quiet, bool *end) // 入力成功で true を返す。
@@ -483,71 +507,7 @@ bool finalize(bool *quiet, bool *end) // 入力成功で true を返す。
         default:
             *quiet = true;  // quiet フラグを true にしてもう一度入力させる。
             return false;
+            break;
     }
 }
 
-int main()
-{
-    char code = '\0';
-    bool quiet = false, arithmeticmode = true, initialized = false, end = false;
-
-    printf("calclator.c\n");
-
-    while(!end)
-    {
-        while(!initialized)
-        {
-            initialized = init(&arithmeticmode);
-        }
-
-        while(1)
-        {
-            if(!quiet)
-            {
-                if(arithmeticmode)
-                {
-                    // 四則演算
-                    // arith は quiet フラグを立てる。モードチェンジを検出したときに true を返す。
-                    arithmeticmode = !arith(&quiet);
-                }
-                else
-                {
-                    // 関数演算
-                    // funct は quiet フラグを立てる。モードチェンジを検出したときに true を返す。
-                    arithmeticmode = funct(&quiet);
-                }
-            }
-            else
-            {
-                printf("\n\tFinal Answer : %Lf\n\n", result);
-                finalize(&quiet, &end);
-                if(end)
-                    break;
-            }
-        }   // while(1)
-    }
-
-    endstep();  // おまけプログラム
-
-    return 0;
-}   // main
-
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
-//////////////////////// Special Thanks ////////////////////////
-/////////////////// # 21C1134 Yuto Yamaguchi ///////////////////
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
-
-/// Reference
-/// # https://wwws.kobe-c.ac.jp/deguchi/c/string.html   // string 操作系関数
-/// # https://marycore.jp/coding/math-nan/  // nan の存在
-/// # https://marycore.jp/coding/math-inf/  // inf の存在
-/// # http://simd.jugem.jp/?eid=29 // math.h > sin, cos, tan Reference
-/// # https://www.sejuku.net/blog/48301 // sleep
-/// # https://www.javadrive.jp/cstart/num/index5.html   // Clang string type Escape code
-/// # https://www.mm2d.net/main/prog/c/console-02.html  // ANSI Escape code
-/// # http://wisdom.sakura.ne.jp/programming/c/c43.html // FILE 構造体の学習
-/// # https://tools.ikunaga.net/mojibake/   // 文字化けジェネレータ
-/// # https://qiita.com/nogtk_/items/eb09ebc10f55590ba513   // sl command source cord reading
-/// # https://www.k-cube.co.jp/wakaba/server/func/isdigit.html  // isdigit
