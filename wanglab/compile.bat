@@ -1,6 +1,6 @@
 @echo off
 setlocal
 
-gcc calclator.c -o calclator.exe -lm
+gcc %calclatorbuckup%.c -o %calclatorbuckup%.exe -lm
 
-calclator.exe
+%calclatorbuckup%.exe

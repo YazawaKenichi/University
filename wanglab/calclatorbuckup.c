@@ -491,7 +491,7 @@ int main()
     char code = '\0';
     bool quiet = false, arithmeticmode = true, initialized = false, end = false;
 
-    printf("calclator.c\n");
+    printf("calclatorbuckup.c\n");
 
     while(!end)
     {

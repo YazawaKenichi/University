@@ -1,3 +1,4 @@
 #!/bin/bash
 
-code calclator.c arithmetic.c functional.c
+code calclatorbackup.c arithmetic.c functional.c compile.sh edit.sh
+
