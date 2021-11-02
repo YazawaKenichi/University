@@ -46,29 +46,6 @@ X Pin_2 2 -200 -100 150 R 50 50 1 1 P
 ENDDRAW
 ENDDEF
 #
-# Connector_Generic_Conn_01x04
-#
-DEF Connector_Generic_Conn_01x04 J 0 40 Y N 1 F N
-F0 "J" 0 200 50 H V C CNN
-F1 "Connector_Generic_Conn_01x04" 0 -300 50 H V C CNN
-F2 "" 0 0 50 H I C CNN
-F3 "" 0 0 50 H I C CNN
-$FPLIST
- Connector*:*_1x??_*
-$ENDFPLIST
-DRAW
-S -50 -195 0 -205 1 1 6 N
-S -50 -95 0 -105 1 1 6 N
-S -50 5 0 -5 1 1 6 N
-S -50 105 0 95 1 1 6 N
-S -50 150 50 -250 1 1 10 f
-X Pin_1 1 -200 100 150 R 50 50 1 1 P
-X Pin_2 2 -200 0 150 R 50 50 1 1 P
-X Pin_3 3 -200 -100 150 R 50 50 1 1 P
-X Pin_4 4 -200 -200 150 R 50 50 1 1 P
-ENDDRAW
-ENDDEF
-#
 # Connector_Generic_Conn_01x05
 #
 DEF Connector_Generic_Conn_01x05 J 0 40 Y N 1 F N
@@ -306,6 +283,55 @@ X PA3 9 500 400 100 L 50 50 1 1 B
 ENDDRAW
 ENDDEF
 #
+# original_Conn_03x04_Male
+#
+DEF original_Conn_03x04_Male U 0 40 Y Y 1 F N
+F0 "U" 0 0 50 H V C CNN
+F1 "original_Conn_03x04_Male" 0 0 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+DRAW
+X ~ 1 -300 -100 100 R 50 50 1 1 B
+X ~ 10 300 -200 100 R 50 50 1 1 B
+X ~ 11 300 -300 100 R 50 50 1 1 B
+X ~ 12 300 -400 100 R 50 50 1 1 B
+X ~ 2 -300 -200 100 R 50 50 1 1 B
+X ~ 3 -300 -300 100 R 50 50 1 1 B
+X ~ 4 -300 -400 100 R 50 50 1 1 B
+X ~ 5 0 -100 100 R 50 50 1 1 B
+X ~ 6 0 -200 100 R 50 50 1 1 B
+X ~ 7 0 -300 100 R 50 50 1 1 B
+X ~ 8 0 -400 100 R 50 50 1 1 B
+X ~ 9 300 -100 100 R 50 50 1 1 B
+ENDDRAW
+ENDDEF
+#
+# original_Conn_03x_05_Male
+#
+DEF original_Conn_03x_05_Male J 0 40 Y Y 1 F N
+F0 "J" 350 350 50 H V C CNN
+F1 "original_Conn_03x_05_Male" -50 350 50 H V C CNN
+F2 "" 300 -200 50 H I C CNN
+F3 "" 300 -200 50 H I C CNN
+DRAW
+X ~ 1 -300 200 100 R 50 50 1 1 B
+X ~ 10 0 -200 100 R 50 50 1 1 B
+X ~ 11 300 200 100 R 50 50 1 1 B
+X ~ 12 300 100 100 R 50 50 1 1 B
+X ~ 13 300 0 100 R 50 50 1 1 B
+X ~ 14 300 -100 100 R 50 50 1 1 B
+X ~ 15 300 -200 100 R 50 50 1 1 B
+X ~ 2 -300 100 100 R 50 50 1 1 B
+X ~ 3 -300 0 100 R 50 50 1 1 B
+X ~ 4 -300 -100 100 R 50 50 1 1 B
+X ~ 5 -300 -200 100 R 50 50 1 1 B
+X ~ 6 0 200 100 R 50 50 1 1 B
+X ~ 7 0 100 100 R 50 50 1 1 B
+X ~ 8 0 0 100 R 50 50 1 1 B
+X ~ 9 0 -100 100 R 50 50 1 1 B
+ENDDRAW
+ENDDEF
+#
 # original_Filter
 #
 DEF original_Filter FB 0 40 Y Y 1 F N
@@ -358,18 +384,18 @@ X ~ 2 200 0 100 L 50 50 1 1 B
 ENDDRAW
 ENDDEF
 #
-# original_V+
+# power_+3.3V
 #
-DEF original_V+ V+ 0 40 N Y 1 F P
-F0 "V+" -100 50 50 H I C CNN
-F1 "original_V+" -100 0 50 H V C CNN
+DEF power_+3.3V #PWR 0 0 Y Y 1 F P
+F0 "#PWR" 0 -150 50 H I C CNN
+F1 "power_+3.3V" 0 140 50 H V C CNN
 F2 "" 0 0 50 H I C CNN
 F3 "" 0 0 50 H I C CNN
 DRAW
-P 2 0 1 0 0 100 0 150 N
-P 2 0 1 0 0 150 -50 50 N
-P 2 0 1 0 0 150 50 50 N
-X ~ ~ 0 0 100 U 50 50 1 1 w
+P 2 0 1 0 -30 50 0 100 N
+P 2 0 1 0 0 0 0 100 N
+P 2 0 1 0 0 100 30 50 N
+X +3V3 1 0 0 0 U 50 50 1 1 W N
 ENDDRAW
 ENDDEF
 #
@@ -401,6 +427,21 @@ P 2 0 1 0 -30 50 0 100 N
 P 2 0 1 0 0 0 0 100 N
 P 2 0 1 0 0 100 30 50 N
 X +5V 1 0 0 0 U 50 50 1 1 W N
+ENDDRAW
+ENDDEF
+#
+# power_+9V
+#
+DEF power_+9V #PWR 0 0 Y Y 1 F P
+F0 "#PWR" 0 -150 50 H I C CNN
+F1 "power_+9V" 0 140 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+DRAW
+P 2 0 1 0 -30 50 0 100 N
+P 2 0 1 0 0 0 0 100 N
+P 2 0 1 0 0 100 30 50 N
+X +9V 1 0 0 0 U 50 50 1 1 W N
 ENDDRAW
 ENDDEF
 #

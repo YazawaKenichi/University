@@ -1,4 +1,4 @@
-19331844030267175
+19335115370954734
 Battery
 BatteryHolder_Bulgin_BX0036_1xC
 Bulgin Battery Holder, BX0036, Battery Type C (https://www.bulgin.com/products/pub/media/bulgin/data/Battery_holders.pdf)
@@ -83495,6 +83495,27 @@ WS2812-2020
 0
 4
 4
+logo
+soiya
+
+
+0
+0
+0
+original
+PinHeader_3x04_P2.54mm_Vertical
+
+
+0
+12
+12
+original
+PinHeader_3x05_P2.54mm_Vertical
+
+
+0
+15
+15
 original
 Regulator
 
@@ -83530,10 +83551,3 @@ TSSOP_P0.65mm
 0
 14
 14
-original
-Tactile_Switch
-
-
-0
-2
-2
