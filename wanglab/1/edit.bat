@@ -1,4 +1,4 @@
 @echo off
 setlocal
 
-code calclator.c arithmetic.c functional.c
+code calclatorbuckup.c arithmetic.c functional.c compile.bat edit.bat
