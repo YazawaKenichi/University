@@ -1,27 +1,26 @@
-#include<stdlib.h>
+#include <stdlib.h>
 #include <GL/glut.h>
 
 static GLfloat ang = 0.0;
 
 void display(void)
-{  
+{
   glClear(GL_COLOR_BUFFER_BIT);
   glColor3f(1.0, 1.0, 0.0);
   glPushMatrix();
-  	glRotatef(ang, 0.0, 0.0, 1.0);
-  	glRectf( -15.0, -15.0, 15.0, 15.0 );
+  glRotatef(ang, 0.0, 0.0, 1.0);
+  glRectf(-15.0, -15.0, 15.0, 15.0 );
   glPopMatrix();
   glutSwapBuffers();  
 }
 
 void simu(void)
 {
-  ang = ang + 1.0;
-  if ( ang > 360.0 )
-  	ang = ang - 360.0;
+  ang = ang + 15.0; // default:1.0
+  if(ang > 360.0)
+      ang = ang - 360.0;
   glutPostRedisplay();
 }
-
 void init(void)
 {
   glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -30,7 +29,7 @@ void init(void)
 
 void reshape(int w, int h)
 {
-  glViewport( 0, 0, w, h );
+  glViewport(0, 0, w, h);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   glOrtho(-50.0, 50.0, -50.0, 50.0, -1.0, 1.0);
@@ -41,11 +40,11 @@ void reshape(int w, int h)
 void mouse(int button, int state, int x, int y){
   switch (button) {
      case GLUT_LEFT_BUTTON:
-     	if ( state == GLUT_DOWN)
+     	if(state == GLUT_DOWN)
      		glutIdleFunc(simu);
      	break;
      case GLUT_RIGHT_BUTTON:
-		if ( state == GLUT_DOWN)
+		if(state == GLUT_DOWN)
      		glutIdleFunc(NULL);
      	break; 
      default:
@@ -55,7 +54,7 @@ void mouse(int button, int state, int x, int y){
 
 void keyboard(unsigned char key, int x, int y)
 {
-  if ( key == '\x1b') exit(0);
+  if(key == '\x1b') exit(0);
 }
 
 int main(int argc, char *argv[])
@@ -73,3 +72,6 @@ int main(int argc, char *argv[])
     glutMainLoop();
   return 0;
 }
+
+
+
