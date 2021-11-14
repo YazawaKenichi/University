@@ -22,8 +22,9 @@ int main(int argc, char *argv[])
   glutInit(&argc, argv);    // GLUT の初期化。
   glutInitDisplayMode(GLUT_RGBA);   // ウィンドウのカラーモデルやバッファの設定を行うための関数。
   glutCreateWindow(argv[0]);    // ウィンドウを生成。
+  glutInitWindowSize(1280, 720);
+  init();
   glutDisplayFunc(display); // ウィンドウの再描画が必要であると判断された時に呼び出される。ディスプレイコールバックの登録。
-  init();   // 自作関数：塗りつぶし
   glutMainLoop();   // GLUT がイベント処理ループに入るようにする。こうすればトップレベルウィンドウが破棄されるまで処理は戻ってこない。
   return 0;
 }
