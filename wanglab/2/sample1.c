@@ -112,7 +112,9 @@ int main(int argc, char *argv[])
  * 
  * ...OpenGL むずいぞ？？？
  * 
- * 
+ * glutDisplayFunc() について追記。
+ * 例えば、四角形を描画する関数 display() を関数宣言してあったとして、その display 関数を、「ウィンドウが描画されるタイミングで呼び出される関数」として登録するために glutDisplayFunc(display) とする。
+	* 記述する場所は「ウィンドウを作成したあと、メインループの前。」
  * 
  * 
  * 
