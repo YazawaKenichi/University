@@ -1,6 +1,7 @@
 #include <GL/gl.h>
 #include <GL/glut.h>
 #include <iostream>
+#include <math.h>
 #include "common2d.h"
 
 using namespace std;

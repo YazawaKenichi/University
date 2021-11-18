@@ -1,3 +1,5 @@
+// sample1.c の一番最初の姿。
+
 #include <GL/glut.h>
 
 void display(void)
