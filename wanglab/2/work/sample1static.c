@@ -1,19 +1,55 @@
-// sample1.c をパックマンに改造した形。direction を用いてパックマンの向きを変更できる。とりあえず提出できるように作ったプログラム。
+// sample1.c をパックマンに改造した形。キー入力を受け付けるタイプの完全形。
 
-///////////////////////memo////////////////////////////
-//
-// あとは キー入力を受け付けて、キーによって Direction を変更するプログラムを追加したい。
-// キーを押下している間は口の開閉を繰り返すプログラムを追加したい。
-//
-///////////////////////////////////////////////////////
+#if false   // 実行ファイルが大きくならないようにする配慮   // こんなことしなくてもコメントアウトはビルドされないのかもしれないけど...
+/*
+                       ■                                                                                   ■    ■■                    ■                                                                                                        
+                 ■■   ■■■                                                                                 ■■■  ■■■■                  ■■■                                                                                                       
+                 ■■■  ■■■                                                                                 ■■■   ■■■                  ■■■                                                                                                       
+                 ■■■  ■■■                                                                                 ■■■   ■■■                  ■■■                                                                ■■                                     
+         ■       ■■■  ■■■                                                                                 ■■■   ■■■                  ■■■                                                               ■■■                                     
+        ■■■      ■■■  ■■■                                                                                 ■■■   ■■■             ■■■■■■■■■■■■■■                                                         ■■■                                     
+        ■■■      ■■■  ■■■■                                                                                ■■■■  ■■■            ■■■■■■■■■■■■■■■■                                                        ■■■                                     
+        ■■■      ■■■   ■■■                                                                                 ■■■  ■■■             ■■■■■■■■■■■■■■■                                                        ■■■                                     
+        ■■■      ■■■   ■■■                                                                                 ■■■   ■■                  ■■■    ■■■                                                        ■■■                                     
+        ■■■      ■■■    ■                                                                                  ■■               ■■■■■■■■■■■■■■■■■■■■■■                                                      ■■■   ■■■                              
+        ■■■                                                                                     ■■■■■■■■■                  ■■■■■■■■■■■■■■■■■■■■■■■■                                                ■■■■■■■■■■■■■■■                             
+        ■■■                                                ■■                        ■■■■■■■■■■■■■■■■■■■■■                  ■■■■■■■■■■■■■■■■■■■■■■                                                 ■■■■■■■■■■■■■■                              
+■■■■■■■■■■■■■■■■■■■■                                      ■■■■                       ■■■■■■■■■■■■■■■■■■■■                            ■■■    ■■■                                       ■            ■■■■■■■■■■■■                                
+■■■■■■■■■■■■■■■■■■■■■                                     ■■■                         ■■■■■■■■■■■■■■■■■                        ■■■■■■■■■■■■■■■■                 ■■■                  ■■■               ■■■                                     
+■■■■■■■■■■■■■■■■■■■■■                                    ■■■■                                  ■■■■■■                          ■■■■■■■■■■■■■■■                  ■■■                  ■■■■              ■■■                                     
+■■■               ■■■                     ■■             ■■■                                  ■■■■■                            ■■■■■■■■■■■■■■■                  ■■■                   ■■■              ■■■                  ■                  
+■■■               ■■■                    ■■■            ■■■■                                  ■■■■                                   ■■■                        ■■■                   ■■■              ■■■         ■■■■■■■■■■■                 
+■■■               ■■■                    ■■■            ■■■                                  ■■■■                              ■■■■■■■■■■■■■■■■                 ■■■                    ■■■             ■■■        ■■■■■■■■■■■■                 
+■■■               ■■■                   ■■■            ■■■■                                 ■■■■                              ■■■■■■■■■■■■■■■■■■                ■■■                    ■■■             ■■■         ■■■■■■■■■■■                 
+■■                ■■■                  ■■■■            ■■■                                  ■■■                                ■■■■■■■■■■■■■■■■                  ■■■  ■■■              ■■■             ■■■                ■■■                  
+■■               ■■■■                 ■■■■             ■■■         ■■■                     ■■■                                       ■■■                         ■■■  ■■■              ■■■            ■■■                ■■■■                  
+■■               ■■■                 ■■■■             ■■■          ■■■                     ■■■                             ■■■■■■■■■■■■■■■■■■■■■■■■              ■■■  ■■■              ■■■            ■■■                ■■■                   
+                 ■■■               ■■■■■              ■■■           ■■■                    ■■■                             ■■■■■■■■■■■■■■■■■■■■■■■■              ■■■ ■■■■              ■■■            ■■■                                      
+                ■■■■             ■■■■■■              ■■■            ■■■■                   ■■■                             ■■■■■■■■■■■■■■■■■■■■■■■■              ■■■ ■■■               ■■■            ■■■                                      
+                ■■■           ■■■■■■■■■              ■■■             ■■■■                  ■■■                                                                    ■■■■■■              ■■■■           ■■■                                       
+               ■■■■          ■■■■■■ ■■■             ■■■               ■■■                  ■■■                                  ■■■■■■■■■■■■■■                    ■■■■■■              ■■■            ■■■                              ■■■■■■■  
+              ■■■■           ■■■■   ■■■             ■■■■■■■■■■■■■■■■■■■■■■                  ■■■                                ■■■■■■■■■■■■■■■■                   ■■■■■               ■■■                                             ■■■■■■■■ 
+             ■■■■                   ■■■            ■■■■■■■■■■■■■■■■■■■■■■■■                 ■■■■                               ■■■■■■■■■■■■■■■■                    ■■■■                ■■                                            ■■■■  ■■■ 
+            ■■■■                    ■■■             ■■■■■■■■■■■■■■■■■■■■■■■                  ■■■■                              ■■■          ■■■                    ■■■■                                           ■■                 ■■■    ■■■
+          ■■■■■                     ■■■                                  ■■■                 ■■■■■■                            ■■■■■■■■■■■■■■■■                    ■■■                                            ■■■               ■■■     ■■■
+         ■■■■■                      ■■■                                  ■■■                   ■■■■■■■                         ■■■■■■■■■■■■■■■■                     ■                                             ■■■■■■   ■■       ■■■     ■■■
+        ■■■■■                       ■■■                                                         ■■■■■■■                        ■■■■■■■■■■■■■■■■                                                                    ■■■■■■■■■■■       ■■     ■■■
+         ■■                          ■■                                                           ■■■■                         ■■■          ■■■                                                                     ■■■■■■■■■■       ■■■   ■■■■
+                                                                                                                               ■■■          ■■■                                                                        ■■■■          ■■■■■■■■■ 
+                                                                                                                               ■■■■■■■■■■■■■■■■                                                                                       ■■■■■■■  
+                                                                                                                                ■■■■■■■■■■■■■■                                                                                         ■■■■■   
+ * */
+#endif
 
 #include <GL/glut.h>
 #include <math.h>
 #include <stdio.h>
+#include <stdbool.h>
 
-// #include <iostream>
+// #include <iostream>  // C++ で書いてた頃の残骸。
 
 #define DEBUGMODE 0
+#define DEBUGMODE2 0
 
 // using namespace std;
 
@@ -21,11 +57,18 @@ enum Direction{RIGHT, UP, LEFT, DOWN} direction;    // これに quarter を掛�
 
 static const int POLYGON = 36;  // 何角形
 static const double QUARTER = M_PI / 2;
+static const double r = 0.75; // パックマン自身の大きさ
+static const double SPEED = 4; // 口の開閉速度  // 一秒間に SPEED 周期
 
-float r = 0.75; // パックマン自身の大きさ
+// パックマンの口の開き方のパターン
+static const unsigned short int MAXIMUM = 90;
+static const unsigned short int MIDDLE = 30;
+static const unsigned short int MINIMUM = 0;
 
-int keepoutdeg = 90;  // パックマンの口の角度を度数法で指定する。
-double toward;
+unsigned short int keepoutdeg = 90;  // パックマンの口の角度を度数法で指定する。
+bool timeren = true;
+
+//////////////////////////// 以下 変更するな //////////////////////
 
 void display(void)
 {
@@ -52,7 +95,7 @@ void display(void)
     double keepout = M_PI * keepoutdeg / 180;
     signed short int minus = +1;
 
-    direction = RIGHT;
+//    direction = RIGHT;
 
     for(int j = 0; j < 2; j++)
     {
@@ -82,7 +125,7 @@ void display(void)
                 printf("theta = %5.3lf direction = %2d cos(%5.3lf) = %5.3lf sin(%5.3lf) = %5.3lf", theta, direction, minus * theta + QUARTER * direction, cos(minus * theta + QUARTER * direction), minus * theta + QUARTER * direction, sin(minus * theta + QUARTER * direction));
                 printf("\n");
 #endif
-                glVertex2d(0, 0);
+                glVertex2d(0, 0);   // 本プログラムの問題点は、パックマンの口の裂け目が円の中心から始まっていることを前提としている点である。実物の PACMAN をよく見ると中心からずれている。ただでさえ面倒くさかったのに更にそれを考慮するのはかなり面倒くさすぎるので妥協する。
             }
         }
     }
@@ -94,23 +137,102 @@ void display(void)
     glFlush();    // 処理の強制実行。
 }
 
-void init(void)
+///////////////////////////////////// 以上 被コールバック関数 display ///////////////////////////////////
+
+void timer(int first)
 {
-    glClearColor(0.0, 0.0, 0.0, 1.0); // glViewPort で指定した範囲を塗りつぶすことが可能らしいが、glViewPort ってなんや？
+    if(timeren)
+    {
+        static bool closing;
+        if(keepoutdeg > MIDDLE)
+        {
+            keepoutdeg = MIDDLE;
+            closing = true;
+        }
+        else if(MAXIMUM > keepoutdeg && keepoutdeg > MINIMUM)
+        {
+            if(closing)
+            {
+                keepoutdeg = MINIMUM;
+            }
+            else
+            {
+                keepoutdeg = MAXIMUM;
+            }
+        }
+        else if(MIDDLE > keepoutdeg)
+        {
+            keepoutdeg = MIDDLE;
+            closing = false;
+        }
+        glutPostRedisplay();
+    }
+    timeren = false;
+    glutTimerFunc(1000 * 1 / (4 * SPEED), timer, 0);
+}
+
+void keyboard(unsigned char key, int hogehoge, int fugafuga)
+{
+    switch(key)
+    {
+        // キーの判断
+        case 'f':
+            direction = RIGHT;
+            break;
+        case 'e':
+            direction = UP;
+            break;
+        case 's':
+            direction = LEFT;
+            break;
+        case 'd':
+            direction = DOWN;
+            break;
+        default:
+            break;
+    }
+
+    switch(key)
+    {
+        case 'f':
+        case 'e':
+        case 's':
+        case 'd':
+            timeren = true;
+            break;
+        default:
+            break;
+    }
 }
 
 int main(int argc, char *argv[])
 {
     glutInit(&argc, argv);    // GLUT の初期化。
     glutInitDisplayMode(GLUT_RGBA);   // ウィンドウのカラーモデルやバッファの設定を行うための関数。
-    glutCreateWindow(argv[0]);    // ウィンドウを生成。
-    glutInitWindowSize(1280, 720);
-    init();
+    glutCreateWindow("PACMAN");    // ウィンドウを生成。
+    glutInitWindowSize(720, 720);
 
     glutDisplayFunc(display); // ウィンドウの再描画が必要であると判断された時に呼び出される。ディスプレイコールバックの登録。
+    glutTimerFunc(1, timer, 0);
+    glutKeyboardFunc(keyboard);
     glutMainLoop();   // GLUT がイベント処理ループに入るようにする。こうすればトップレベルウィンドウが破棄されるまで処理は戻ってこない。
     return 0;
 }
 
+#if false
+/// REFERENCE
+// https://lazesoftware.com/tool/hugeaagen/ // AA ジェネレータ
+// https://www.exa-corp.co.jp/technews/files/OpenGL-text-091.pdf    // 塗りつぶし多角形の描画
+//
+// http://wisdom.sakura.ne.jp/system/opengl/gl2.html    // GLUT
+// http://wisdom.sakura.ne.jp/system/opengl/gl3.html    // glBegin glColor
+// http://wisdom.sakura.ne.jp/system/opengl/gl4.html    // glFlush
+// http://wisdom.sakura.ne.jp/system/opengl/gl10.html   // glutTimerFunc glutKeyboardFunc
+// 
+// http://wisdom.sakura.ne.jp/system/opengl/index.html  // このサイトには本当にお世話になったし、これからもお世話になる。
+// 
 
+/// 今回は上記インターネットの情報を頼りに、誰にも聞くこと無くプログラムしました。王教授はここまでのものを求めていなかったような気はしてますが、興に乗ってしまってつい....
+
+#endif
 
