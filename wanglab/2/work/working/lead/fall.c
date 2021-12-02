@@ -46,14 +46,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-// #include <iostream>  // C++ で書いてた頃の残骸。
-
 #define DEBUGMODE 0
-#define DEBUGMODE2 0
-
-// using namespace std;
-
-// enum Direction{RIGHT, UP, LEFT, DOWN} direction;    // これに quarter を掛ければ方向（toward）がけっていして、±keepou/2 だけ黒塗りすれば完成 // パックマンプログラムの名残
+#define DEBUGMODE2 1
 
 typedef struct
 {
@@ -68,29 +62,27 @@ typedef enum
     CIRCLE = 36
 } Polygon;
 
-// static const int POLYGON = 36;  // 何角形
 static const double QUARTER = M_PI / 2;
 static const double r = 0.75; // パックマン自身の大きさ
-static const double SPEED = 4; // 口の開閉速度  // 一秒間に SPEED 周期
 static const WindowSize WINDOWSIZE = {300, 300};
 
-// パックマンの口の開き方のパターン
-// static const unsigned short int MAXIMUM = 90;
-// static const unsigned short int MIDDLE = 30;
-// static const unsigned short int MINIMUM = 0;
-static const unsigned short int signedeg = 0;   // 回転運動が出来ているか見るためのサイン
+#if DEBUGMODE2
+static const unsigned short int signedeg = 0;   // 回転運動が出来ているか見るためのサイン   // 回転でバッグライン
+#endif
 
-unsigned short int keepoutdeg;  // パックマンの口の角度を度数法で指定する。初期値 90 deg
+#if DEBUGMODE
+static const unsigned short int LINEDEG = 10; // 何度置きに線を引くか
+#endif
+
 double direction;  // 向く方向を決める。あとで値が PI / 4 倍されることに注意。
 bool timeren = true;
 Polygon polygon;
 
-//////////////////////////// 以下 変更するな //////////////////////
+//////////////////////////// 以下 コールバック関数 display //////////////////////
 
 void display(void)
 {
     double theta;
-//    double toward = quarter * UP; // Direction から一つ選ぶとパックマンがその方向を向く。
 
     glClearColor(0.0, 0.0, 0, 1); // バッファを塗りつぶしたい色
     glClear(GL_COLOR_BUFFER_BIT); // 指定したバッファを特定の色で消去する。 
@@ -98,7 +90,6 @@ void display(void)
 #if DEBUGMODE   // 15 度置きに線を引く（デバッグ用）
     glColor3f(0.5, 0.5, 1);
     glBegin(GL_LINES);
-    static const unsigned short int LINEDEG = 10; // 何度置きに線を引くか
     for(int i = 0; i < 360 / LINEDEG; i++)
     {
         glVertex2d(cos(i * M_PI * LINEDEG / 180), sin(i * M_PI * LINEDEG / 180));
@@ -110,10 +101,8 @@ void display(void)
     glBegin(GL_TRIANGLE_STRIP);
     glColor3f(1, 1, 0);
 
-    double keepout = (CIRCLE == polygon) ? M_PI * keepoutdeg / 180 : 0;
+    double keepout = (CIRCLE == polygon) ? M_PI * signedeg / 180 : 0;   // 円モードのときは回転でバッグラインを表示しない。
     signed short int minus = +1;
-
-//    direction = RIGHT;
 
     for(int j = 0; j < 2; j++)
     {
@@ -162,11 +151,10 @@ void timer(int first)   // 1 秒ごとに呼び出される。
 {
     if(timeren)
     {
-        keepoutdeg = signedeg;
         glutPostRedisplay();
     }
     timeren = false;
-    glutTimerFunc(1000 * 1 / (4 * SPEED), timer, 0);
+    glutTimerFunc(1000, timer, 0);
 }
 
 void keyboard(unsigned char key, int hogehoge, int fugafuga)
