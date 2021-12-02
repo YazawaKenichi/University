@@ -55,10 +55,17 @@
 
 enum Direction{RIGHT, UP, LEFT, DOWN} direction;    // これに quarter を掛ければ方向（toward）がけっていして、±keepou/2 だけ黒塗りすれば完成t
 
+typedef struct
+{
+    int X;
+    int Y;
+} WindowSize;
+
 static const int POLYGON = 36;  // 何角形
 static const double QUARTER = M_PI / 2;
 static const double r = 0.75; // パックマン自身の大きさ
 static const double SPEED = 4; // 口の開閉速度  // 一秒間に SPEED 周期
+static const WindowSize WINDOWSIZE = {300, 300};
 
 // パックマンの口の開き方のパターン
 static const unsigned short int MAXIMUM = 90;
@@ -89,7 +96,7 @@ void display(void)
     glEnd();
 #endif
 
-    glBegin(GL_TRIANGLE_STRIP);
+    glBegin(GL_TRIANGLE_STRIP); // default:GL_TRIANGLE_STRIP
     glColor3f(1, 1, 0);
 
     double keepout = M_PI * keepoutdeg / 180;
@@ -205,14 +212,19 @@ void keyboard(unsigned char key, int hogehoge, int fugafuga)
     }
 }
 
+void reshape()
+{
+    glutReshapeWindow(WINDOWSIZE.X, WINDOWSIZE.Y);
+}
+
 int main(int argc, char *argv[])
 {
     glutInit(&argc, argv);    // GLUT の初期化。
     glutInitDisplayMode(GLUT_RGBA);   // ウィンドウのカラーモデルやバッファの設定を行うための関数。
+    glutInitWindowSize(WINDOWSIZE.X, WINDOWSIZE.Y);
     glutCreateWindow("PACMAN");    // ウィンドウを生成。
-    glutInitWindowSize(720, 720);
-    glClearColor(0, 0, 0, 1);
 
+    glutReshapeFunc(reshape);
     glutDisplayFunc(display); // ウィンドウの再描画が必要であると判断された時に呼び出される。ディスプレイコールバックの登録。
     glutTimerFunc(1, timer, 0);
     glutKeyboardFunc(keyboard);

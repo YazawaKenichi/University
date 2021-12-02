@@ -1,4 +1,4 @@
-// sample1.c をパックマンに改造した形。キー入力を受け付けるタイプの完全形。
+// sample1.c で円を描画してからそれを落とすプログラム。
 
 #if false   // 実行ファイルが大きくならないようにする配慮   // こんなことしなくてもコメントアウトはビルドされないのかもしれないけど...
 /*
@@ -53,20 +53,37 @@
 
 // using namespace std;
 
-enum Direction{RIGHT, UP, LEFT, DOWN} direction;    // これに quarter を掛ければ方向（toward）がけっていして、±keepou/2 だけ黒塗りすれば完成t
+// enum Direction{RIGHT, UP, LEFT, DOWN} direction;    // これに quarter を掛ければ方向（toward）がけっていして、±keepou/2 だけ黒塗りすれば完成 // パックマンプログラムの名残
 
-static const int POLYGON = 36;  // 何角形
+typedef struct
+{
+    int X;
+    int Y;
+} WindowSize;
+
+typedef enum
+{
+    TRIANGLE = 3,   // 三角形のプログラムも実装してぇ...
+    SQUARE = 4,
+    CIRCLE = 36
+} Polygon;
+
+// static const int POLYGON = 36;  // 何角形
 static const double QUARTER = M_PI / 2;
 static const double r = 0.75; // パックマン自身の大きさ
 static const double SPEED = 4; // 口の開閉速度  // 一秒間に SPEED 周期
+static const WindowSize WINDOWSIZE = {300, 300};
 
 // パックマンの口の開き方のパターン
-static const unsigned short int MAXIMUM = 90;
-static const unsigned short int MIDDLE = 30;
-static const unsigned short int MINIMUM = 0;
+// static const unsigned short int MAXIMUM = 90;
+// static const unsigned short int MIDDLE = 30;
+// static const unsigned short int MINIMUM = 0;
+static const unsigned short int signedeg = 0;   // 回転運動が出来ているか見るためのサイン
 
-unsigned short int keepoutdeg = 90;  // パックマンの口の角度を度数法で指定する。
+unsigned short int keepoutdeg;  // パックマンの口の角度を度数法で指定する。初期値 90 deg
+double direction;  // 向く方向を決める。あとで値が PI / 4 倍されることに注意。
 bool timeren = true;
+Polygon polygon;
 
 //////////////////////////// 以下 変更するな //////////////////////
 
@@ -81,9 +98,10 @@ void display(void)
 #if DEBUGMODE   // 15 度置きに線を引く（デバッグ用）
     glColor3f(0.5, 0.5, 1);
     glBegin(GL_LINES);
-    for(int i = 0; i < 360 / 15; i++)
+    static const unsigned short int LINEDEG = 10; // 何度置きに線を引くか
+    for(int i = 0; i < 360 / LINEDEG; i++)
     {
-        glVertex2d(cos(i * M_PI * 15 / 180), sin(i * M_PI * 15 / 180));
+        glVertex2d(cos(i * M_PI * LINEDEG / 180), sin(i * M_PI * LINEDEG / 180));
         glVertex2d(0, 0);
     }
     glEnd();
@@ -92,7 +110,7 @@ void display(void)
     glBegin(GL_TRIANGLE_STRIP);
     glColor3f(1, 1, 0);
 
-    double keepout = M_PI * keepoutdeg / 180;
+    double keepout = (CIRCLE == polygon) ? M_PI * keepoutdeg / 180 : 0;
     signed short int minus = +1;
 
 //    direction = RIGHT;
@@ -102,27 +120,28 @@ void display(void)
 #if DEBUGMODE
         printf("j = %2d ", j);
 #endif
-        minus = pow(-1, j); // 一周目は theta が正になるように、二週目は theta が負になるようにする。
+        minus = pow(-1, j); // 下で行われる for の、一周目は theta が正になるように、二週目は theta が負になるようにする。
 #if DEBUGMODE
         printf("minus = %3d ", minus);
         printf("\n");
 #endif
-        for(int i = 0; i <= POLYGON / 2; i++)
+        for(int i = 0; i <= polygon / 2; i++)
         {
-            theta = (2 * M_PI / POLYGON) * i;
+            theta = (2 * M_PI / polygon) * i;
 #if DEBUGMODE
             printf("i = %3d ", i);
             printf("\n");
 #endif
-            if(2 * M_PI * i / POLYGON >= keepout / 2)
+            if(2 * M_PI * i / polygon >= keepout / 2)
             {
 #if DEBUGMODE
-                printf("2 * M_PI * i / POLYGON >= keepout / 2 ");
+                printf("2 * M_PI * i / polygon >= keepout / 2 ");
                 printf("\n");
 #endif
+                // 回転運動の実現はこの direction に適切な値を入れれば良い。QUARTER が掛けられていることに注意。
                 glVertex2d(r * cos(minus * theta + QUARTER * direction), r * sin(minus * theta + QUARTER * direction));
 #if DEBUGMODE
-                printf("theta = %5.3lf direction = %2d cos(%5.3lf) = %5.3lf sin(%5.3lf) = %5.3lf", theta, direction, minus * theta + QUARTER * direction, cos(minus * theta + QUARTER * direction), minus * theta + QUARTER * direction, sin(minus * theta + QUARTER * direction));
+                printf("theta = %5.3lf direction = %5.3lf cos(%5.3lf) = %5.3lf sin(%5.3lf) = %5.3lf", theta, direction, minus * theta + QUARTER * direction, cos(minus * theta + QUARTER * direction), minus * theta + QUARTER * direction, sin(minus * theta + QUARTER * direction));
                 printf("\n");
 #endif
                 glVertex2d(0, 0);   // 本プログラムの問題点は、パックマンの口の裂け目が円の中心から始まっていることを前提としている点である。実物の PACMAN をよく見ると中心からずれている。ただでさえ面倒くさかったのに更にそれを考慮するのはかなり面倒くさすぎるので妥協する。
@@ -139,32 +158,11 @@ void display(void)
 
 ///////////////////////////////////// 以上 被コールバック関数 display ///////////////////////////////////
 
-void timer(int first)
+void timer(int first)   // 1 秒ごとに呼び出される。
 {
     if(timeren)
     {
-        static bool closing;
-        if(keepoutdeg > MIDDLE)
-        {
-            keepoutdeg = MIDDLE;
-            closing = true;
-        }
-        else if(MAXIMUM > keepoutdeg && keepoutdeg > MINIMUM)
-        {
-            if(closing)
-            {
-                keepoutdeg = MINIMUM;
-            }
-            else
-            {
-                keepoutdeg = MAXIMUM;
-            }
-        }
-        else if(MIDDLE > keepoutdeg)
-        {
-            keepoutdeg = MIDDLE;
-            closing = false;
-        }
+        keepoutdeg = signedeg;
         glutPostRedisplay();
     }
     timeren = false;
@@ -176,17 +174,11 @@ void keyboard(unsigned char key, int hogehoge, int fugafuga)
     switch(key)
     {
         // キーの判断
-        case 'f':
-            direction = RIGHT;
-            break;
-        case 'e':
-            direction = UP;
+        case 'c':
+            polygon = CIRCLE;
             break;
         case 's':
-            direction = LEFT;
-            break;
-        case 'd':
-            direction = DOWN;
+            polygon = SQUARE;
             break;
         default:
             break;
@@ -194,24 +186,25 @@ void keyboard(unsigned char key, int hogehoge, int fugafuga)
 
     switch(key)
     {
-        case 'f':
-        case 'e':
-        case 's':
-        case 'd':
-            timeren = true;
-            break;
         default:
+            timeren = true;   // どこかで timeren = true にする必要がある。
             break;
     }
+}
+
+void reshape()
+{
+    glutReshapeWindow(WINDOWSIZE.X, WINDOWSIZE.Y);
 }
 
 int main(int argc, char *argv[])
 {
     glutInit(&argc, argv);    // GLUT の初期化。
     glutInitDisplayMode(GLUT_RGBA);   // ウィンドウのカラーモデルやバッファの設定を行うための関数。
+    glutInitWindowSize(WINDOWSIZE.X, WINDOWSIZE.Y);
     glutCreateWindow("PACMAN");    // ウィンドウを生成。
-    glutInitWindowSize(720, 720);
 
+    glutReshapeFunc(reshape);
     glutDisplayFunc(display); // ウィンドウの再描画が必要であると判断された時に呼び出される。ディスプレイコールバックの登録。
     glutTimerFunc(1, timer, 0);
     glutKeyboardFunc(keyboard);
