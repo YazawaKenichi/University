@@ -169,6 +169,29 @@ void display(void)
 
 ///////////////////////////////////// 以上 被コールバック関数 display ///////////////////////////////////
 
+void idle()   // 1 秒ごとに呼び出される。
+{
+//    glutPostRedisplay();  // この行をコメントアウトするとディスプレイが描画されなくなるはずなのに、ちゃんと描画される。なんで？
+    // サポセン曰く、他のところでどこか再描画されるようになってるっぽい。
+    // でもどの関数で再描画されるようになってんのかよくわかんないから、いつか沼りそう。
+/*
+    if(count == 0)
+    {
+        glutTimerFunc(1000, timer, count + 1);
+        // この部分で OpenGL のタイマについてわかったことがある。
+        // OpenGL のタイマは、glutTimerFunc で自分を呼び出すと永遠に自分を呼び続けるようになっている。
+        // 実際にこの DEBUGMODE2 を 1 にしてこのプログラムを実行してみるとわかるが
+        // 一周目は count がゼロで、glutTimerFunc を実行し
+        // 二週目からは 引数に入っている count + 1 によって count には 1 が入り
+        // その後三週目に入ろうとしても count != 0 となり glutTimerFunc は実行出来ない。
+        // しかし count = 1 の状態で実行し続けることから、一度コールバックに登録すると永遠にコールバックされ続けることが分かった。
+        // また、if(count == 0) と条件文の中に書かなくても同様の動作をする。
+        // 具体的には、二週目までは同じ動作をし、三週目に入る時に count = 1 + 1 となり、三週目の count の値は 2 になるはずが、
+        // 実際には 1 となっており、もうわけがわからない。
+    }
+*/
+}
+
 void mouse(int button, int state, int argumentx, int argumenty)
 {
     // なぜかここで計算できてない
@@ -229,6 +252,7 @@ int main(int argc, char *argv[])
 //    glutKeyboardFunc(keyboard);
     glutMouseFunc(mouse);   // イベント処理関数が一度呼ばれると爆速で呼び出されまくるので正直 timer の需要がない。
 //    glutTimerFunc(1, timer, 0);
+    glutDisplayFunc(display);
 //    glutIdleFunc(NULL);
 
     glutMainLoop();   // GLUT がイベント処理ループに入るようにする。こうすればトップレベルウィンドウが破棄されるまで処理は戻ってこない。
