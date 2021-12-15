@@ -108,6 +108,7 @@ void mousefunc(int button, int state, int argumentx, int argumenty)
     {
         Vector getpos = {argumentx, argumenty};
 #if DEBUGMODE
+        printf("getops = { %5d, %5d }\n", getops.x, getops.y);
 #endif
         mouse.setvector(getpos);    // mouse.vectorfloat に値が代入される。
         switch(button)
