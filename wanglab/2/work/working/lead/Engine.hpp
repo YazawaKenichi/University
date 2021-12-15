@@ -2,8 +2,10 @@
 #define ENGINE_H
 
 #include <math.h>
-#include <typeinfo> // 変数から型を推測するための関数に必要なヘッダ
-// typeid() を使っている。
+// #include <typeinfo> // 変数から型を推測するための関数に必要なヘッダ
+#include <GL/glut.h>
+#include <math.h>
+#include <stdbool.h>
 
 typedef struct
 {
@@ -38,7 +40,6 @@ typedef struct
     float b;
 } Color;
 
-
 typedef enum
 {
     TRIANGLE = 3,
@@ -57,44 +58,44 @@ public:
     Vector vector;
     Vectorfloat vectorfloat;
     Mouse();
-    void setvector(vector);
-}
+    void setvector(Vector);
+};
 
 class Object
 {
 public:
+    Color color;
+    void setcolor(Color);
+};
+
+class Rigidbody : public Object
+{
+public:
+    Polygon _polygon;
     Vectorfloat position;
     Quaternion rotation;
     Vectorfloat scale;
-    Color color;
-    void setcolor(Color);
     float r;
     double signedeg;
-}
+    void draw();
+};
 
-class Ball : public Object
+class Ball : public Rigidbody 
 {
-private:
-    Polygon _polygon = CIRCLE;
 public:
     static unsigned int count;
     Ball(Vectorfloat, Quaternion, Vectorfloat);
     Ball(Vectorfloat, float);
-    void draw();
-}
+};
 
-class Box : public Object
+class Box : public Rigidbody
 {
-private:
-    Polygon _polygon = SQUARE;
 public:
     static unsigned int count;
     Box(Vectorfloat, Quaternion, Vectorfloat);
     Box(Vectorfloat, float);
-    void draw();
-}
+};
 
-template <typename T>
-void glVertex(T);
+void drawing(Rigidbody);
 
 #endif

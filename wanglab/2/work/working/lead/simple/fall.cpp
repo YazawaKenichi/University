@@ -46,7 +46,7 @@
 #include <GL/glut.h>
 #include <math.h>
 #include <stdbool.h>
-#include "Engine.h"
+#include "../Engine.hpp"
 
 #define DEBUGMODE 0
 #define DEBUGMODE2 1
@@ -57,26 +57,20 @@
 double direction;  // 向く方向を決める。あとで値が PI / 4 倍されることに注意。
 bool timeren = true;
 Mouse mouse;
-
-    // インスタンスの生成が必要
+unsigned char ballcount = 0;
+Vectorfloat offset = {(float) 0, (float) 0};
+Ball ball(offset, 0.1f);
 
 //////////////////////////// 以下 コールバック関数 display //////////////////////
 
-void display(void)
+void displayfunc(void)
 {
     double theta;
 
     glClearColor(0.0, 0.0, 0, 1); // バッファを塗りつぶしたい色
     glClear(GL_COLOR_BUFFER_BIT); // 指定したバッファを特定の色で消去する。 
 
-    glBegin(GL_TRIANGLE_STRIP);
-    glColor3f(1, 1, 0);
-
-    double keepout = (CIRCLE == polygon) ? M_PI * signedeg / 180 : 0;   // 円モードのときは回転でバッグラインを表示しない。
-    signed short int minus = +1;
-
-    mouse.vectorfloat.x = 2 * (double)mousevector.x / WINDOWSIZE.X - 1;
-    mouse.vectorfloat.y = - 2 * (double)mousevector.y / WINDOWSIZE.Y + 1;
+    ball.draw();
 
     glEnd();
 //    glFlush();
@@ -85,12 +79,18 @@ void display(void)
 
 ///////////////////////////////////// 以上 被コールバック関数 display ///////////////////////////////////
 
-void reshapefunc()
+void timerfunc(int hogehoge)
+{
+    // ここに物理計算を記述する
+    glutTimerFunc(1 * pow(10, -3), timerfunc, 0);
+}
+
+void reshapefunc(int hogehoge, int fugafuga)
 {
     glutReshapeWindow(WINDOWSIZE.X, WINDOWSIZE.Y);
 }
 
-void keyboardfunc(int key, int x, int y)
+void keyboardfunc(unsigned char key, int x, int y)
 {
     switch(key)
     {
@@ -104,40 +104,25 @@ void keyboardfunc(int key, int x, int y)
 
 void mousefunc(int button, int state, int argumentx, int argumenty)
 {
-    switch(button)
+    if(state == GLUT_DOWN)
     {
-        case GLUT_LEFT_BUTTON:
-            if(state == GLUT_DOWN)
-            {
-                polygon = CIRCLE;
-                mousevector.x = argumentx;   // argumentx, y は int 型、つまりピクセル座標が入る。それを OpenGL 特有の画面スケール座標に変換するためにウィンドウのサイズで割り算する。
-                mousevector.y = argumenty;
-            }
-            break;
-        case GLUT_RIGHT_BUTTON:
-            if(state == GLUT_DOWN)
-            {
-                polygon = SQUARE;
-                mousevector.x = argumentx;   // argumentx, y は int 型、つまりピクセル座標が入る。それを OpenGL 特有の画面スケール座標に変換するためにウィンドウのサイズで割り算する。
-                mousevector.y = argumenty;
-            }
-            break;
-        case GLUT_MIDDLE_BUTTON:
-            if(state == GLUT_DOWN)
-            {
-                mousevector.x = argumentx;   // argumentx, y は int 型、つまりピクセル座標が入る。それを OpenGL 特有の画面スケール座標に変換するためにウィンドウのサイズで割り算する。
-                mousevector.y = argumenty;
-            }
-            break;
-        default:
-            break;
+        Vector getpos = {argumentx, argumenty};
+#if DEBUGMODE
+#endif
+        mouse.setvector(getpos);    // mouse.vectorfloat に値が代入される。
+        switch(button)
+        {
+            case GLUT_LEFT_BUTTON:
+                ball.position = mouse.vectorfloat;
+                break;
+            case GLUT_RIGHT_BUTTON:
+                break;
+            case GLUT_MIDDLE_BUTTON:
+                break;
+            default:
+                break;
+        }
     }
-}
-
-void timerfunc(int hogehoge)
-{
-    // ここに物理計算を記述する
-    glutTimerFunc(1 * pow(10, -3), timer, 0);
 }
 
 int main(int argc, char *argv[])
