@@ -48,6 +48,8 @@ typedef enum
 } Polygon;
 
 static const double QUARTER = M_PI / 2;
+static const unsigned short int DT = 1;  // 物理計算の積分周期 (ms)
+unsigned double dt = DT / 1000;
 #ifndef WINDOWSIZE
 static const WindowSize WINDOWSIZE = {300, 300};
 #endif
@@ -55,13 +57,26 @@ static const WindowSize WINDOWSIZE = {300, 300};
 class Mouse
 {
 public:
+    bool hover; // マウス長押し判定
+    unsigned long long int hovertime;   // マウス長押し時間 (DT の回数が入る)
     Vector vector;
     Vectorfloat vectorfloat;
     Mouse();
     void setvector(Vector);
 };
 
-class Object
+class Time
+{
+public:
+    unsigned long long int time;
+    unsigned short int seconds;
+    unsigned short int minits;
+    unsigned short int hours;
+    unsigned long long int miltime;
+    Time();
+};
+
+class Object : public Time
 {
 public:
     Color color;
@@ -72,12 +87,19 @@ class Rigidbody : public Object
 {
 public:
     Polygon _polygon;
-    Vectorfloat position;
-    Quaternion rotation;
-    Vectorfloat scale;
-    float r;
+    Vectorfloat position;   // 位置
+    Quaternion rotation;    // 回転量
+    Vectorfloat scale;  // サイズ
+    Vectorfloat velocity;   // 速度
+    Vectorfloat accel;    // 加速度
+    float g;    // 重力加速度
+    float r;    // 外接円半径
+    float e;    // 反発係数
     double signedeg;
     void draw();
+    Rigidbody();
+    Rigidbody(Vectorfloat, Vectorfloat, Vectorfloat);
+    void physics();
 };
 
 class Ball : public Rigidbody 
@@ -97,5 +119,12 @@ public:
 };
 
 void drawing(Rigidbody);
+// void physics(Rigidbody *);
+// void timerfunc(int, void *, int);
+// void reshapefunc(int, int);
+// void registor();
 
 #endif
+
+
+
