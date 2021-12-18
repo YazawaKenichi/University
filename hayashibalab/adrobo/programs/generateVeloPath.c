@@ -5,6 +5,8 @@
 /*                        Revised  Dec.11, 2016 and Dec.5, 2020 */
 /****************************************************************/
 
+// 両車輪の速度を格納した csv データを使って、その値を 1000 倍して配列にするだけのプログラム。
+
 #include<stdio.h>
 #include<stdlib.h>
 
@@ -45,5 +47,5 @@ int main(){
 	printf("The header file of velocity trajectories path_data.h is generated sucessfully.\n");
 
           return 0;
-}Checking out files: 100% (200/200), done.
+}
 
