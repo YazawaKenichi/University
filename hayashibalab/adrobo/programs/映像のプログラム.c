@@ -22,7 +22,9 @@ int vpath_idx = 0;
 const double sampling_time = 0.02;
 const double move_per_pulse = 0.0005;
 double i_left = 0, i_right = 0;
-const double ki = 10, kp = 1;
+const double kir = 10, kpr = 5 * 0.8;
+const double kil = 10 * 0.995, kpl = 5 * 0.8;
+
 double low_pass_filter(double val, double pre_val, double gamma)
 {
     return gamma * pre_val + (1.0 - gamma) * val;
