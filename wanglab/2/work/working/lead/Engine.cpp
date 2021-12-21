@@ -158,7 +158,7 @@ void glVertexfloat(Vectorfloat argumentvector)
 void Rigidbody::physics()
 {
     this->velocity.x += this->accel.x * DT / 1000;
-    this->velocity.y += this->accel.y * DT / 1000;
+    this->velocity.y += ((usegravity) ? this->g : 0) + this->accel.y * DT / 1000;
     this->position.x += this->velocity.x * DT / 1000;
     this->position.y += this->velocity.y * DT / 1000;
 }

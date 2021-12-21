@@ -93,6 +93,7 @@ public:
     Vectorfloat scale;  // サイズ
     Vectorfloat velocity;   // 速度
     Vectorfloat accel;    // 加速度
+    bool usegravity;
     float g;    // 重力加速度
     float r;    // 外接円半径
     float e;    // 反発係数

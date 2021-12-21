@@ -18,11 +18,9 @@ bool timeren = true;
 Mouse mouse;
 unsigned char ballcount = 0;
 Vectorfloat zero = {(float) 0, (float) 0};
-Color offsetcolor[2] = {{1, 1, 0}, {1, 0.75, 0.75}};
-Ball ball0(zero, 0.05f);
-Ball ball1(zero, 0.05f);
-Ball *ball[2] = {ball0, ball1};
-unsigned short int arraysize = 2;    // 配列の要素数（ball 配列がポインタなせいで sizeof を使っても当てにならない。)
+Color offsetcolor = {1, 1, 0};
+Ball ball(zero, 0.05f);
+ball.usegravity = true;
 Time t;
 
 //////////////////////////// 以下 コールバック関数 display //////////////////////
@@ -32,12 +30,9 @@ void displayfunc(void)
     glClearColor(0.0, 0.0, 0, 1); // バッファを塗りつぶしたい色
     glClear(GL_COLOR_BUFFER_BIT); // 指定したバッファを特定の色で消去する。 
 
-    for(int i = 0; i < arraysize; i++)
-    {
-        ball[i]->draw();
-    }
+    ball.draw();
 #if DEBUGMODE
-    printf("ball[0].draw()\n");
+    printf("ball.draw()\n");
 #endif
 
     glEnd();
@@ -55,11 +50,8 @@ void reshapefunc(int hogehoge, int fugafuga)
 void timerfunc(int hogehoge)
 {
     // ここに物理計算を記述する
-    for(int i = 0; i < arraysize; i++)
-    {
-        ball[i]->accel.y = ball[i]->g;
-        ball[i]->pysics();  // 設定された速度と加速度から座標を更新する。
-    }
+    ball.accel.y = ball.g;
+    ball.physics(); // 設定された速度と加速度から座標を更新する。
     if(mouse.hover)
     {
         mouse.hovertime++;
@@ -92,30 +84,12 @@ void mousefunc(int button, int state, int argumentx, int argumenty)
         switch(button)
         {
             case GLUT_LEFT_BUTTON:
-                // ここはボールの数が 2 つじゃないと正常に動作しないプログラムになってしまっている。
-                if(ball[1]->enable)
-                {
-                    if(ball[2]->enable)
-                    {
-                        for(int i = 0; i < arraysize; i++)
-                        {
-                            ball[i]->position = mouse.vectorfloat;
-                            ball[i]->velocity = zero;
+                ball.position = mouse.vectorfloat;
+                ball.velocity = zero;
 #if DEBUGMODE
-                            printf("getpos = { %5d, %5d }\n", getpos.x, getpos.y);
-                            printf("ball->position = {{ %5.3f, %5.3f }, { %5.3f, %5.3f }}\n", ball[0]->position.x, ball[0]->position.y, ball[1]->position.x, ball[1]->position.y);
+                printf("getpos = { %5d, %5d }\n", getpos.x, getpos.y);
+                printf("ball.position = { %5.3f, %5.3f }\n", ball.position.x, ball.position.y);
 #endif
-                        }
-                    }
-                    else
-                    {
-                        ball[2]->enable = true;
-                    }
-                }
-                else
-                {
-                    ball[1]->enable = true;
-                }
                 break;
             case GLUT_RIGHT_BUTTON:
                 break;
@@ -135,10 +109,7 @@ int main(int argc, char *argv[])
     glutCreateWindow("Faling");    // ウィンドウを生成。
     glClearColor(0, 0, 0, 0);
     glShadeModel(GL_FLAT);
-    for(int i = 0; i < arraysize; i++)
-    {
-        ball[i].setcolor(offsetcolor[i]);
-    }
+    ball.setcolor(offsetcolor);
 
     glutDisplayFunc(displayfunc); // ウィンドウの再描画が必要であると判断された時に呼び出される。ディスプレイコールバックの登録。
     glutKeyboardFunc(keyboardfunc);
