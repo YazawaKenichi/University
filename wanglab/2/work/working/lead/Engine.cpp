@@ -56,21 +56,36 @@ void Mouse::setvector(Vector argumentmousevector)   // int 型の座標から fl
 
 Time::Time()
 {
+    clockup = 0;
     time = 0;
     seconds = 0;
-    minits = 0;
+    minutes = 0;
     hours = 0;
     miltime = 0;
 }
 
+void Time::clock()
+{
+    if(clockup++ % (1000 / DT) == (1000 / DT) - 1)
+    {
+        time++;
+    }
+    if(clockup % DT == (DT) - 1)
+    {
+        miltime += DT;
+    }
+//    minutes = time % 60;
+//    seconds = time - 60 * minutes;
+}
+
 Rigidbody::Rigidbody()
 {
-    g = 9.80665;
+    g = -9.80665;
 }
 
 Rigidbody::Rigidbody(Vectorfloat positionoffset, Vectorfloat velocityoffset, Vectorfloat acceloffset)
 {
-    g = 9.80665;
+    g = -9.80665;
     position = positionoffset;
     velocity = velocityoffset;
     accel = acceloffset;
@@ -142,11 +157,12 @@ void glVertexfloat(Vectorfloat argumentvector)
 
 void Rigidbody::physics()
 {
-    this->velocity.x += this->accel.x * dt;
-    this->velocity.y += this->accel.y * dt;
-    this->position.x += this->velocity.x * dt;
-    this->position.y += this->velocity.y * dt;
+    this->velocity.x += this->accel.x * DT / 1000;
+    this->velocity.y += this->accel.y * DT / 1000;
+    this->position.x += this->velocity.x * DT / 1000;
+    this->position.y += this->velocity.y * DT / 1000;
 }
+
 
 /*
 void registor()

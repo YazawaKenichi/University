@@ -5,7 +5,7 @@
 #include <GL/glut.h>
 #include <math.h>
 #include <stdbool.h>
-#include "../Engine.hpp"
+#include "Engine.hpp"
 
 #define DEBUGMODE 1
 #define DEBUGMODE2 0

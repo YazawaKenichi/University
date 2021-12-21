@@ -48,8 +48,7 @@ typedef enum
 } Polygon;
 
 static const double QUARTER = M_PI / 2;
-static const unsigned short int DT = 1;  // 物理計算の積分周期 (ms)
-unsigned double dt = DT / 1000;
+static const unsigned short int DT = 10;  // 物理計算の積分周期 (ms)
 #ifndef WINDOWSIZE
 static const WindowSize WINDOWSIZE = {300, 300};
 #endif
@@ -68,11 +67,13 @@ public:
 class Time
 {
 public:
+    unsigned short int clockup;
     unsigned long long int time;
     unsigned short int seconds;
-    unsigned short int minits;
+    unsigned short int minutes;
     unsigned short int hours;
     unsigned long long int miltime;
+    void clock();
     Time();
 };
 
