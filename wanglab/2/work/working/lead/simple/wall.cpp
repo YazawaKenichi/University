@@ -20,7 +20,6 @@ unsigned char ballcount = 0;
 Vectorfloat zero = {(float) 0, (float) 0};
 Color offsetcolor = {1, 1, 0};
 Ball ball(zero, 0.05f);
-ball.usegravity = true;
 Time t;
 
 //////////////////////////// 以下 コールバック関数 display //////////////////////
@@ -49,14 +48,17 @@ void reshapefunc(int hogehoge, int fugafuga)
 
 void timerfunc(int hogehoge)
 {
-    // ここに物理計算を記述する
-    ball.accel.y = ball.g;
-    ball.physics(); // 設定された速度と加速度から座標を更新する。
     if(mouse.hover)
     {
         mouse.hovertime++;
     }
-#if DEBUGMODE
+    // ここに物理計算を記述する
+
+
+
+    // ここまで
+    ball.physics(); // 設定された速度と加速度から座標を更新する。
+#if DEBUGMODE2
     printf("time = %4llu, miltime = %4llu\n", t.time, t.miltime);
 #endif
     t.clock();
@@ -84,9 +86,19 @@ void mousefunc(int button, int state, int argumentx, int argumenty)
         switch(button)
         {
             case GLUT_LEFT_BUTTON:
-                ball.position = mouse.vectorfloat;
-                ball.velocity = zero;
-#if DEBUGMODE
+                if(GLUT_DOWN)
+                {
+                    mouse.hover = true;
+                    mouse.vectorfloatbuffer = mouse.vectorfloat;
+                }
+                else if(GLUT_UP)
+                {
+                    mouse.hover = false;
+                    ball.position = mouse.vectorfloat;
+                    Vectorfloat velocityoffset = vectordifference(mouse.vectorfloat, mouse.vectorfloatbuffer);
+                    ball.velocity = velocityoffset / DT;
+                }
+#if DEBUGMODE2
                 printf("getpos = { %5d, %5d }\n", getpos.x, getpos.y);
                 printf("ball.position = { %5.3f, %5.3f }\n", ball.position.x, ball.position.y);
 #endif
@@ -110,6 +122,7 @@ int main(int argc, char *argv[])
     glClearColor(0, 0, 0, 0);
     glShadeModel(GL_FLAT);
     ball.setcolor(offsetcolor);
+    ball.usegravity = true;
 
     glutDisplayFunc(displayfunc); // ウィンドウの再描画が必要であると判断された時に呼び出される。ディスプレイコールバックの登録。
     glutKeyboardFunc(keyboardfunc);

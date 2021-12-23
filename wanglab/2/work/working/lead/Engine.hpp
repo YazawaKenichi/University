@@ -60,6 +60,7 @@ public:
     unsigned long long int hovertime;   // マウス長押し時間 (DT の回数が入る)
     Vector vector;
     Vectorfloat vectorfloat;
+    Vectorfloat vectorfloatbuffer;
     Mouse();
     void setvector(Vector);
 };
@@ -107,7 +108,6 @@ public:
 class Ball : public Rigidbody 
 {
 public:
-    static unsigned int count;
     Ball(Vectorfloat, Quaternion, Vectorfloat);
     Ball(Vectorfloat, float);
 };
@@ -115,12 +115,13 @@ public:
 class Box : public Rigidbody
 {
 public:
-    static unsigned int count;
     Box(Vectorfloat, Quaternion, Vectorfloat);
     Box(Vectorfloat, float);
 };
 
+
 void drawing(Rigidbody);
+Vectorfloat vectordifference(Vectorfloat, Vectorfloat);
 // void physics(Rigidbody *);
 // void timerfunc(int, void *, int);
 // void reshapefunc(int, int);

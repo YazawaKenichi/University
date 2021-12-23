@@ -131,7 +131,6 @@ Box::Box(Vectorfloat argumentposition, Quaternion argumentrotation, Vectorfloat 
     rotation = argumentrotation;
     scale = argumentscale;
     signedeg = 0;
-//    Ball::count++;
 }
 
 Box::Box(Vectorfloat argumentposition, float argumentr)
@@ -142,7 +141,6 @@ Box::Box(Vectorfloat argumentposition, float argumentr)
     r = argumentr;
     scale = {r * 2, r * 2};
     signedeg = 0;
-//    Box::count++;
 }
 
 void glVertexint(Vector argumentvector)
@@ -163,6 +161,17 @@ void Rigidbody::physics()
     this->position.y += this->velocity.y * DT / 1000;
 }
 
+Vectorfloat vectordifference(Vectorfloat a, Vectorfloat b)
+{
+    Vectorfloat c = {a.x - b.x, a.y - b.y};
+    return c;
+}
+
+Vectorfloat vectorquotient(Vectorfloat a, double b)
+{
+    Vectorfloat c = {a.x / b, a.y / b};
+    return c;
+}
 
 /*
 void registor()

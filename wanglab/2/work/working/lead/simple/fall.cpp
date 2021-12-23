@@ -21,6 +21,7 @@ Vectorfloat zero = {(float) 0, (float) 0};
 Color offsetcolor = {1, 1, 0};
 Ball ball(zero, 0.05f);
 Time t;
+ball.usegravity = false;
 
 //////////////////////////// 以下 コールバック関数 display //////////////////////
 
@@ -34,7 +35,6 @@ void displayfunc(void)
     printf("ball.draw()\n");
 #endif
 
-    glEnd();
 //    glFlush();
     glutSwapBuffers();    // 処理の強制実行。
 }
