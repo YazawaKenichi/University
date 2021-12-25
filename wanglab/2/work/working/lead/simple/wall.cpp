@@ -54,8 +54,6 @@ void timerfunc(int hogehoge)
     }
     // ここに物理計算を記述する
 
-
-
     // ここまで
     ball.physics(); // 設定された速度と加速度から座標を更新する。
 #if DEBUGMODE2
@@ -88,15 +86,16 @@ void mousefunc(int button, int state, int argumentx, int argumenty)
             case GLUT_LEFT_BUTTON:
                 if(GLUT_DOWN)
                 {
-                    mouse.hover = true;
-                    mouse.vectorfloatbuffer = mouse.vectorfloat;
+//                    mouse.hover = true;
+//                    mouse.vectorfloatbuffer = mouse.vectorfloat;
                 }
                 else if(GLUT_UP)
                 {
                     mouse.hover = false;
+                    ball.velocity = {0, 0};
                     ball.position = mouse.vectorfloat;
-                    Vectorfloat velocityoffset = vectordifference(mouse.vectorfloat, mouse.vectorfloatbuffer);
-                    ball.velocity = velocityoffset / DT;
+//                    Vectorfloat velocityoffset = vectordifference(mouse.vectorfloat, mouse.vectorfloatbuffer);
+//                    ball.velocity = vectorquotient(velocityoffset, DT);
                 }
 #if DEBUGMODE2
                 printf("getpos = { %5d, %5d }\n", getpos.x, getpos.y);

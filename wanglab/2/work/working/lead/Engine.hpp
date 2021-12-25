@@ -1,7 +1,6 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#include <math.h>
 // #include <typeinfo> // 変数から型を推測するための関数に必要なヘッダ
 #include <GL/glut.h>
 #include <math.h>
@@ -48,7 +47,11 @@ typedef enum
 } Polygon;
 
 static const double QUARTER = M_PI / 2;
+static const unsigned short int utheta = 20;    // 物体が滑り出す傾き
 static const unsigned short int DT = 10;  // 物理計算の積分周期 (ms)
+static const double G = 50;// 9.80665;    // 重力加速度
+static const double E = 0.8; // 0.745;  // 反発係数
+#define U (tan(2 * M_PI * utheta / 360))    // 摩擦係数
 #ifndef WINDOWSIZE
 static const WindowSize WINDOWSIZE = {300, 300};
 #endif
@@ -94,12 +97,12 @@ public:
     Vectorfloat scale;  // サイズ
     Vectorfloat velocity;   // 速度
     Vectorfloat accel;    // 加速度
+    Vectorfloat collide;  // 衝突して受ける力の単位ベクトル
     bool usegravity;
-    float g;    // 重力加速度
     float r;    // 外接円半径
-    float e;    // 反発係数
     double signedeg;
     void draw();
+    void printf();  // Rigidbody の情報を見るための printf をいくつも用意した関数。デバッグ用
     Rigidbody();
     Rigidbody(Vectorfloat, Vectorfloat, Vectorfloat);
     void physics();
@@ -110,6 +113,9 @@ class Ball : public Rigidbody
 public:
     Ball(Vectorfloat, Quaternion, Vectorfloat);
     Ball(Vectorfloat, float);
+//    bool collided(Rigidbody);   // 相手のオブジェクトを指定する
+    // その物体と衝突しているときには true が返され、その時の相手の位置ベクトルが Vectorfloat collide に格納される。
+    // 衝突していないときは false が返され、collide の値は NULL になる。
 };
 
 class Box : public Rigidbody
@@ -117,11 +123,15 @@ class Box : public Rigidbody
 public:
     Box(Vectorfloat, Quaternion, Vectorfloat);
     Box(Vectorfloat, float);
+//    bool collided(Rigidbody);   // 相手のオブジェクトを指定する
+    // その物体と衝突しているときにはその時の相手の相対位置ベクトルが Vectorfloat collide に格納される。
+    // 衝突していないときは false が返され、collide の値は NULL になる。
 };
 
 
 void drawing(Rigidbody);
 Vectorfloat vectordifference(Vectorfloat, Vectorfloat);
+Vectorfloat vectorquotient(Vectorfloat, double);
 // void physics(Rigidbody *);
 // void timerfunc(int, void *, int);
 // void reshapefunc(int, int);

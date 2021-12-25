@@ -16,9 +16,6 @@ void drawing(Rigidbody *rigidbody)
     glColor3f(rigidbody->color.r, rigidbody->color.g, rigidbody->color.b);
 #if DEBUGMODE_HPP
     cout << "glColor3f()" << endl;
-    cout << "Rigidbody->Position = { " << rigidbody->position.x << ", " << rigidbody->position.y << " }" << endl;
-    cout << "Rigidbody->Scale = { " << rigidbody->scale.x << ", " << rigidbody->scale.y << " }" << endl;
-    cout << "Rigidbody->Rotation = { " << rigidbody->rotation.z << " }" << endl;
 #endif
     for(int j = 0; j < 2; j++)
     {
@@ -80,15 +77,29 @@ void Time::clock()
 
 Rigidbody::Rigidbody()
 {
-    g = -9.80665;
+    // NULL
 }
 
 Rigidbody::Rigidbody(Vectorfloat positionoffset, Vectorfloat velocityoffset, Vectorfloat acceloffset)
 {
-    g = -9.80665;
     position = positionoffset;
     velocity = velocityoffset;
     accel = acceloffset;
+}
+
+void Rigidbody::draw()
+{
+    drawing(this);
+}
+
+void Rigidbody::printf()
+{
+    cout << "Rigidbody->usegravity = " << this->usegravity << endl;
+    cout << "Rigidbody->accel = { " << this->accel.x << ", " << this->accel.y << " }" << endl;
+    cout << "Rigidbody->velocity = { " << this->velocity.x << ", " << this->velocity.y << " }" << endl;
+    cout << "Rigidbody->Position = { " << this->position.x << ", " << this->position.y << " }" << endl;
+    cout << "Rigidbody->Scale = { " << this->scale.x << ", " << this->scale.y << " }" << endl;
+    cout << "Rigidbody->Rotation = { " << this->rotation.z << " }" << endl;
 }
 
 void Object::setcolor(Color argumentcolor)
@@ -98,13 +109,9 @@ void Object::setcolor(Color argumentcolor)
     this->color.b = argumentcolor.b;
 }
 
-void Rigidbody::draw()
-{
-    drawing(this);
-}
-
 Ball::Ball(Vectorfloat argumentposition, Quaternion argumentrotation, Vectorfloat argumentscale)
 {
+    usegravity = true;
     _polygon = CIRCLE;
     position = argumentposition;
     rotation = argumentrotation;
@@ -115,6 +122,7 @@ Ball::Ball(Vectorfloat argumentposition, Quaternion argumentrotation, Vectorfloa
 
 Ball::Ball(Vectorfloat argumentposition, float argumentr)
 {
+    usegravity = true;
     _polygon = CIRCLE;
     position = argumentposition;
     rotation = {0, 0, 0, 1};
@@ -124,8 +132,15 @@ Ball::Ball(Vectorfloat argumentposition, float argumentr)
 //    Ball::count++;
 }
 
+/*
+bool Ball::collided(Rigidbody opponent)
+{
+}
+*/
+
 Box::Box(Vectorfloat argumentposition, Quaternion argumentrotation, Vectorfloat argumentscale)
 {
+    usegravity = false;
     _polygon = SQUARE;
     position = argumentposition;
     rotation = argumentrotation;
@@ -135,6 +150,7 @@ Box::Box(Vectorfloat argumentposition, Quaternion argumentrotation, Vectorfloat 
 
 Box::Box(Vectorfloat argumentposition, float argumentr)
 {
+    usegravity = false;
     _polygon = SQUARE;
     position = argumentposition;
     rotation = {0, 0, 0, 1};
@@ -142,6 +158,15 @@ Box::Box(Vectorfloat argumentposition, float argumentr)
     scale = {r * 2, r * 2};
     signedeg = 0;
 }
+
+/*
+bool Box::collided(Rigidbody *opponent)
+{
+    Vectorfloat difference = vectordifference(opponent->position, this->position);
+    // 衝突しているかどうかを戻す条件式を作成
+    return false;
+}
+*/
 
 void glVertexint(Vector argumentvector)
 {
@@ -155,10 +180,36 @@ void glVertexfloat(Vectorfloat argumentvector)
 
 void Rigidbody::physics()
 {
+    /*
     this->velocity.x += this->accel.x * DT / 1000;
     this->velocity.y += ((usegravity) ? this->g : 0) + this->accel.y * DT / 1000;
     this->position.x += this->velocity.x * DT / 1000;
     this->position.y += this->velocity.y * DT / 1000;
+    */
+    cout << "this->position.y - this->scale.y / 2 = " << this->position.y - this->scale.y / 2 << endl;
+    if(this->position.y - this->scale.y <= -1)   // 床の作成
+    {
+        cout << "床に到達しました" << endl;
+        this->accel.x = 0; // U * G;  // a = μg
+        this->velocity.x += this->accel.x * DT / 1000;
+        this->position.x += this->velocity.x * DT / 1000;
+
+        this->accel.y = 0;  // a = g - g    // ∵ 作用反作用
+        this->velocity.y = -E * this->velocity.y;
+        this->position.y += this->velocity.y * DT / 1000;
+    }
+    else
+    {
+        cout << "まだ床に達していません" << endl;
+        this->accel.x = 0;  // a = μg
+        this->velocity.x += this->accel.x * DT / 1000;
+        this->position.x += this->velocity.x * DT / 1000;
+
+        this->accel.y = (usegravity ? -G : 0) * DT / 1000;  // a = g - g    // ∵ 作用反作用
+        this->velocity.y += this->accel.y * DT / 1000;
+        this->position.y += this->velocity.y * DT / 1000;
+    }
+    this->printf();
 }
 
 Vectorfloat vectordifference(Vectorfloat a, Vectorfloat b)
@@ -169,9 +220,11 @@ Vectorfloat vectordifference(Vectorfloat a, Vectorfloat b)
 
 Vectorfloat vectorquotient(Vectorfloat a, double b)
 {
-    Vectorfloat c = {a.x / b, a.y / b};
+    Vectorfloat c = {((float) a.x) / ((float) b), ((float) a.y) / ((float) b)};
     return c;
 }
+
+// ぶつかった
 
 /*
 void registor()
