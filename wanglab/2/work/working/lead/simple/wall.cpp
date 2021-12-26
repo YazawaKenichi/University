@@ -1,10 +1,12 @@
 // sample1.c で円を描画してからそれを落とすプログラム。
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <iostream>
 #include <GL/glut.h>
 #include <math.h>
 #include <stdbool.h>
+#include <time.h>
 #include "../Engine.hpp"
 
 #define DEBUGMODE 1
@@ -20,6 +22,7 @@ bool timeren = true;
 Mouse mouse;
 unsigned char ballcount = 0;
 Vectorfloat zero = {(float) 0, (float) 0};
+Color zerocolor = {0, 0, 0};
 Color offsetcolor = {1, 1, 0};
 Ball ball(zero, 0.05f);
 Time t;
@@ -32,7 +35,7 @@ void displayfunc(void)
     glClear(GL_COLOR_BUFFER_BIT); // 指定したバッファを特定の色で消去する。 
 
     ball.draw();
-#if DEBUGMODE
+#if DEBUGMODE2
     printf("ball.draw()\n");
 #endif
 
@@ -50,20 +53,22 @@ void reshapefunc(int hogehoge, int fugafuga)
 
 void timerfunc(int hogehoge)
 {
-    if(mouse.hover)
-    {
-        mouse.hovertime++;
-    }
     // ここに物理計算を記述する
 
     // ここまで
-    ball.physics(); // 設定された速度と加速度から座標を更新する。
-    if(hogehoge == 1)
+    if(ball.enable)
     {
-        ball.accel.x = 500;
-        cout << "first" << endl;
-        ball.printf();
+        ball.setcolor(offsetcolor);
+        ball.usegravity = true;
     }
+    else
+    {
+        ball.usegravity = false;
+#if DEBUGMODE2
+        cout << "ball.color = {" << ball.color.r << ", " << ball.color.g << ", " << ball.color.b << " }" << endl;
+#endif
+    }
+    ball.physics(); // 設定された速度と加速度から座標を更新する。
 #if DEBUGMODE2
     printf("time = %4llu, miltime = %4llu\n", t.time, t.miltime);
 #endif
@@ -92,25 +97,26 @@ void mousefunc(int button, int state, int argumentx, int argumenty)
         switch(button)
         {
             case GLUT_LEFT_BUTTON:
-                if(GLUT_DOWN)
-                {
-//                    mouse.hover = true;
-//                    mouse.vectorfloatbuffer = mouse.vectorfloat;
-                }
-                else if(GLUT_UP)
-                {
-                    mouse.hover = false;
-                    ball.velocity = {0, 0};
-                    ball.position = mouse.vectorfloat;
-//                    Vectorfloat velocityoffset = vectordifference(mouse.vectorfloat, mouse.vectorfloatbuffer);
-//                    ball.velocity = vectorquotient(velocityoffset, DT);
-                }
-#if DEBUGMODE2
-                printf("getpos = { %5d, %5d }\n", getpos.x, getpos.y);
-                printf("ball.position = { %5.3f, %5.3f }\n", ball.position.x, ball.position.y);
-#endif
+                ball.velocity = {0, 0};
+                srand((unsigned int) time(NULL));
+                ball.accel.x = ((rand() % (20 + 1)) - 10) * 10;
+                ball.position = mouse.vectorfloat;
+                ball.enable = true;
                 break;
             case GLUT_RIGHT_BUTTON:
+                if(ball.enable)
+                {
+                    // 一時停止
+                    ball.enable = false;
+                    ball.buffer.velocity = ball.velocity;
+                    ball.velocity = {0, 0};
+                }
+                else
+                {
+                    // 再生
+                    ball.enable = true;
+                    ball.velocity = ball.buffer.velocity;
+                }
                 break;
             case GLUT_MIDDLE_BUTTON:
                 break;
@@ -128,8 +134,8 @@ int main(int argc, char *argv[])
     glutCreateWindow("Faling");    // ウィンドウを生成。
     glClearColor(0, 0, 0, 0);
     glShadeModel(GL_FLAT);
-    ball.setcolor(offsetcolor);
-    ball.usegravity = true;
+    ball.enable = false;
+    ball.usegravity = false;
 
     glutDisplayFunc(displayfunc); // ウィンドウの再描画が必要であると判断された時に呼び出される。ディスプレイコールバックの登録。
     glutKeyboardFunc(keyboardfunc);

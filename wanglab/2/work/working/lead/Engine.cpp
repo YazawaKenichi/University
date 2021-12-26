@@ -14,7 +14,7 @@ void drawing(Rigidbody *rigidbody)
     double keepout = (CIRCLE == rigidbody->_polygon) ? M_PI * rigidbody->signedeg / 100 : 0; // デバッグライン
     glBegin(GL_TRIANGLE_STRIP);
     glColor3f(rigidbody->color.r, rigidbody->color.g, rigidbody->color.b);
-#if DEBUGMODE_HPP
+#if DEBUGMODE_HPP2
     cout << "glColor3f()" << endl;
 #endif
     for(int j = 0; j < 2; j++)
@@ -187,12 +187,32 @@ void Rigidbody::physics()
     this->position.y += this->velocity.y * DT / 1000;
     */
     cout << "this->position.y - this->scale.y / 2 = " << this->position.y - this->scale.y / 2 << endl;
-    if(this->position.y - this->scale.y <= -1 || this->position.y + this->scale.y >= 1)   // 床の作成
+
+    // y 軸方向の主要処理
+    float holizontaltangent = this->position.y + this->scale.y * ((this->position.y > 0) ? 1 : -1);
+    if(holizontaltangent < -1 || 1 < holizontaltangent)   // 床の作成
     {
         cout << "床または天井に到達しました" << endl;
         this->accel.y = 0;  // a = g - g    // ∵ 作用反作用
         this->velocity.y = -E * this->velocity.y;
         this->position.y += this->velocity.y * DT / 1000;
+        this->position.y = ((holizontaltangent > 0) ? 1 : -1) * (1 - this->scale.y);
+        /*
+        // ここに回転摩擦の処理を作りたい
+        if(this->position.y < 0)    // 到達したのが床だった時
+        {
+            if(this->accel.x >= U)
+            {
+                // 動摩擦係数
+                this->accel.x = ud * G * ((this->velocity.x > 0) ? -1 : 1) + this->accel.x;
+            }
+            else
+            {
+                // 最大静止摩擦力を下回った時停止扱いする
+                this->velocity.x = 0;
+            }
+        }
+        */
     }
     else
     {
@@ -202,19 +222,30 @@ void Rigidbody::physics()
         this->position.y += this->velocity.y * DT / 1000;
     }
 
-    if(this->position.x - this->scale.x <= -1 || this->position.x + this->scale.x >= 1)
+    // x 軸方向の主要処理
+    float verticaltangent = this->position.x + this->scale.x * ((this->position.x > 0) ? 1 : -1);
+    if(verticaltangent < -1 || 1 < verticaltangent)
     {
         cout << "壁に接触しました" << endl;
+        this->velocity.x = -E * this->velocity.x;
+        this->position.x += this->velocity.x * DT / 1000;
+        this->position.x = ((verticaltangent > 0) ? 1 : -1) * (1 - this->scale.x);
         this->accel.x = 0;
-        this->velocity.y = -E * this->velocity.y;
-        this->position.y += this->velocity.y * DT / 1000;
     }
     else
     {
         cout << "まだ壁に接触していません" << endl;
-        this->accel.x = 0;
         this->velocity.x += this->accel.x * DT / 1000;
         this->position.x += this->velocity.x * DT / 1000;
+        this->accel.x = 0;
+    }
+
+    if(abs(this->velocity.x) < 0.2)
+    {
+        cout << "横移動の停止" << endl;
+        this->accel.x = 0;
+        this->velocity.x = 0;
+        this->position.x = this->position.x;
     }
 
     this->printf();

@@ -48,10 +48,11 @@ typedef enum
 
 static const double QUARTER = M_PI / 2;
 static const unsigned short int utheta = 20;    // 物体が滑り出す傾き
-static const unsigned short int DT = 10;  // 物理計算の積分周期 (ms)
-static const double G = 50;// 9.80665;    // 重力加速度
+static const unsigned short int DT = 25;  // 物理計算の積分周期 (ms)
+static const double G = 9.80665;    // 重力加速度
 static const double E = 0.8; // 0.745;  // 反発係数
-#define U (tan(2 * M_PI * utheta / 360))    // 摩擦係数
+#define U (tan(2 * M_PI * utheta / 360))    // 最大静止摩擦係数
+static const double ud = U;  // 動摩擦係数
 #ifndef WINDOWSIZE
 static const WindowSize WINDOWSIZE = {300, 300};
 #endif
@@ -98,7 +99,9 @@ public:
     Vectorfloat velocity;   // 速度
     Vectorfloat accel;    // 加速度
     Vectorfloat collide;  // 衝突して受ける力の単位ベクトル
+    bool enable;
     bool usegravity;
+    bool collision; // 衝突判定
     float r;    // 外接円半径
     double signedeg;
     void draw();
@@ -111,6 +114,7 @@ public:
 class Ball : public Rigidbody 
 {
 public:
+    Rigidbody buffer;
     Ball(Vectorfloat, Quaternion, Vectorfloat);
     Ball(Vectorfloat, float);
 //    bool collided(Rigidbody);   // 相手のオブジェクトを指定する
