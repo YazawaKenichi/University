@@ -187,28 +187,36 @@ void Rigidbody::physics()
     this->position.y += this->velocity.y * DT / 1000;
     */
     cout << "this->position.y - this->scale.y / 2 = " << this->position.y - this->scale.y / 2 << endl;
-    if(this->position.y - this->scale.y <= -1)   // 床の作成
+    if(this->position.y - this->scale.y <= -1 || this->position.y + this->scale.y >= 1)   // 床の作成
     {
-        cout << "床に到達しました" << endl;
-        this->accel.x = 0; // U * G;  // a = μg
-        this->velocity.x += this->accel.x * DT / 1000;
-        this->position.x += this->velocity.x * DT / 1000;
-
+        cout << "床または天井に到達しました" << endl;
         this->accel.y = 0;  // a = g - g    // ∵ 作用反作用
         this->velocity.y = -E * this->velocity.y;
         this->position.y += this->velocity.y * DT / 1000;
     }
     else
     {
-        cout << "まだ床に達していません" << endl;
-        this->accel.x = 0;  // a = μg
-        this->velocity.x += this->accel.x * DT / 1000;
-        this->position.x += this->velocity.x * DT / 1000;
-
+        cout << "まだ床または天井に達していません" << endl;
         this->accel.y = (usegravity ? -G : 0) * DT / 1000;  // a = g - g    // ∵ 作用反作用
         this->velocity.y += this->accel.y * DT / 1000;
         this->position.y += this->velocity.y * DT / 1000;
     }
+
+    if(this->position.x - this->scale.x <= -1 || this->position.x + this->scale.x >= 1)
+    {
+        cout << "壁に接触しました" << endl;
+        this->accel.x = 0;
+        this->velocity.y = -E * this->velocity.y;
+        this->position.y += this->velocity.y * DT / 1000;
+    }
+    else
+    {
+        cout << "まだ壁に接触していません" << endl;
+        this->accel.x = 0;
+        this->velocity.x += this->accel.x * DT / 1000;
+        this->position.x += this->velocity.x * DT / 1000;
+    }
+
     this->printf();
 }
 

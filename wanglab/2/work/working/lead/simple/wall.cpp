@@ -11,6 +11,8 @@
 #define DEBUGMODE2 0
 #define DEBUGMODE3 0
 
+using namespace std;
+
 // glVertex2f(2 * vector.x / WINDOWSIZE.X - 1, -2 * vector.y / WINDOWSIZE.Y + 1);
 
 double direction;  // 向く方向を決める。あとで値が PI / 4 倍されることに注意。
@@ -56,6 +58,12 @@ void timerfunc(int hogehoge)
 
     // ここまで
     ball.physics(); // 設定された速度と加速度から座標を更新する。
+    if(hogehoge == 1)
+    {
+        ball.accel.x = 500;
+        cout << "first" << endl;
+        ball.printf();
+    }
 #if DEBUGMODE2
     printf("time = %4llu, miltime = %4llu\n", t.time, t.miltime);
 #endif
@@ -126,7 +134,7 @@ int main(int argc, char *argv[])
     glutDisplayFunc(displayfunc); // ウィンドウの再描画が必要であると判断された時に呼び出される。ディスプレイコールバックの登録。
     glutKeyboardFunc(keyboardfunc);
     glutMouseFunc(mousefunc);   // イベント処理関数が一度呼ばれると爆速で呼び出されまくるので正直 timer の需要がない。
-    glutTimerFunc(1, timerfunc, 0);
+    glutTimerFunc(1, timerfunc, 1);
     glutReshapeFunc(reshapefunc);
 
     glutMainLoop();   // GLUT がイベント処理ループに入るようにする。こうすればトップレベルウィンドウが破棄されるまで処理は戻ってこない。
