@@ -37,6 +37,7 @@ typedef struct
     float r;
     float g;
     float b;
+    float a;
 } Color;
 
 typedef enum
@@ -98,10 +99,10 @@ public:
     Vectorfloat scale;  // サイズ
     Vectorfloat velocity;   // 速度
     Vectorfloat accel;    // 加速度
-    Vectorfloat collide;  // 衝突して受ける力の単位ベクトル
     bool enable;
     bool usegravity;
-    bool collision; // 衝突判定
+    bool wallcollision;
+    bool floorcollision;
     float r;    // 外接円半径
     double signedeg;
     void draw();

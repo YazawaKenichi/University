@@ -25,10 +25,11 @@ Mouse mouse;
 unsigned char ballcount = 0;
 unsigned short int counter = 0;
 Vectorfloat zero = {(float) 0, (float) 0};
-Color zerocolor = {0, 0, 0};
-Color offsetcolor = {1, 1, 0};
-Ball ball1(zero, 0.05f);
-Ball ball2(zero, 0.05f);
+Vectorfloat out = {(float) 2, (float) 2};
+Color zerocolor = {0, 0, 0, 0};
+Color offsetcolor = {1, 1, 0, 1};
+Ball ball1(out, 0.05f);
+Ball ball2(out, 0.05f);
 Ball *ball[2] = {&ball1, &ball2};
 Time t;
 
@@ -167,7 +168,7 @@ void mousefunc(int button, int state, int argumentx, int argumenty)
                     ball[i]->enable = false;
                     ball[i]->setcolor(zerocolor);
                     ball[i]->velocity = zero;
-                    ball[i]->position = zero;
+                    ball[i]->position = out;
                 }
                 break;
             default:
@@ -188,6 +189,8 @@ int main(int argc, char *argv[])
     {
         ball[i]->enable = false;
         ball[i]->usegravity = false;
+        ball[i]->wallcollision = false;
+        ball[i]->floorcollision = false;
     }
 
     glutDisplayFunc(displayfunc); // ウィンドウの再描画が必要であると判断された時に呼び出される。ディスプレイコールバックの登録。

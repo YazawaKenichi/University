@@ -13,7 +13,7 @@ void drawing(Rigidbody *rigidbody)
     signed char minus = +1;
     double keepout = (CIRCLE == rigidbody->_polygon) ? M_PI * rigidbody->signedeg / 100 : 0; // デバッグライン
     glBegin(GL_TRIANGLE_STRIP);
-    glColor3f(rigidbody->color.r, rigidbody->color.g, rigidbody->color.b);
+    glColor4f(rigidbody->color.r, rigidbody->color.g, rigidbody->color.b, rigidbody->color.a);
 #if DEBUGMODE_HPP2
     cout << "glColor3f()" << endl;
 #endif
@@ -107,6 +107,7 @@ void Object::setcolor(Color argumentcolor)
     this->color.r = argumentcolor.r;
     this->color.g = argumentcolor.g;
     this->color.b = argumentcolor.b;
+    this->color.a = argumentcolor.a;
 }
 
 Ball::Ball(Vectorfloat argumentposition, Quaternion argumentrotation, Vectorfloat argumentscale)
@@ -190,33 +191,19 @@ void Rigidbody::physics()
 
     // y 軸方向の主要処理
     float holizontaltangent = this->position.y + this->scale.y * ((this->position.y > 0) ? 1 : -1);
-    if(holizontaltangent < -1 || 1 < holizontaltangent)   // 床の作成
+    if(!this->wallcollision && (holizontaltangent <= -1 || 1 <= holizontaltangent))   // 床の作成
     {
         cout << "床または天井に到達しました" << endl;
+        this->wallcollision = true;
         this->accel.y = 0;  // a = g - g    // ∵ 作用反作用
         this->velocity.y = -E * this->velocity.y;
         this->position.y += this->velocity.y * DT / 1000;
         this->position.y = ((holizontaltangent > 0) ? 1 : -1) * (1 - this->scale.y);
-        /*
-        // ここに回転摩擦の処理を作りたい
-        if(this->position.y < 0)    // 到達したのが床だった時
-        {
-            if(this->accel.x >= U)
-            {
-                // 動摩擦係数
-                this->accel.x = ud * G * ((this->velocity.x > 0) ? -1 : 1) + this->accel.x;
-            }
-            else
-            {
-                // 最大静止摩擦力を下回った時停止扱いする
-                this->velocity.x = 0;
-            }
-        }
-        */
     }
     else
     {
         cout << "まだ床または天井に達していません" << endl;
+        this->wallcollision = false;
         this->accel.y = (usegravity ? -G : 0) * DT / 1000;  // a = g - g    // ∵ 作用反作用
         this->velocity.y += this->accel.y * DT / 1000;
         this->position.y += this->velocity.y * DT / 1000;
@@ -224,9 +211,10 @@ void Rigidbody::physics()
 
     // x 軸方向の主要処理
     float verticaltangent = this->position.x + this->scale.x * ((this->position.x > 0) ? 1 : -1);
-    if(verticaltangent < -1 || 1 < verticaltangent)
+    if(!this->floorcollision && (verticaltangent <= -1 || 1 <= verticaltangent))
     {
         cout << "壁に接触しました" << endl;
+        this->floorcollision = true;
         this->velocity.x = -E * this->velocity.x;
         this->position.x += this->velocity.x * DT / 1000;
         this->position.x = ((verticaltangent > 0) ? 1 : -1) * (1 - this->scale.x);
@@ -235,6 +223,7 @@ void Rigidbody::physics()
     else
     {
         cout << "まだ壁に接触していません" << endl;
+        this->floorcollision = false;
         this->velocity.x += this->accel.x * DT / 1000;
         this->position.x += this->velocity.x * DT / 1000;
         this->accel.x = 0;
