@@ -1,4 +1,4 @@
-// sample1.c で円を描画してからそれを落とすプログラム。
+// 落ちるだけのプログラム
 
 #include <stdio.h>
 #include <iostream>

@@ -71,8 +71,6 @@ void Time::clock()
     {
         miltime += DT;
     }
-//    minutes = time % 60;
-//    seconds = time - 60 * minutes;
 }
 
 Rigidbody::Rigidbody()
@@ -118,7 +116,6 @@ Ball::Ball(Vectorfloat argumentposition, Quaternion argumentrotation, Vectorfloa
     rotation = argumentrotation;
     scale = argumentscale;
     signedeg = 0;
-//    count++;
 }
 
 Ball::Ball(Vectorfloat argumentposition, float argumentr)
@@ -130,14 +127,7 @@ Ball::Ball(Vectorfloat argumentposition, float argumentr)
     r = argumentr;
     scale = {r * 2, r * 2};
     signedeg = 0;
-//    Ball::count++;
 }
-
-/*
-bool Ball::collided(Rigidbody opponent)
-{
-}
-*/
 
 Box::Box(Vectorfloat argumentposition, Quaternion argumentrotation, Vectorfloat argumentscale)
 {
@@ -160,15 +150,6 @@ Box::Box(Vectorfloat argumentposition, float argumentr)
     signedeg = 0;
 }
 
-/*
-bool Box::collided(Rigidbody *opponent)
-{
-    Vectorfloat difference = vectordifference(opponent->position, this->position);
-    // 衝突しているかどうかを戻す条件式を作成
-    return false;
-}
-*/
-
 void glVertexint(Vector argumentvector)
 {
     glVertex2f(2 * argumentvector.x / WINDOWSIZE.X - 1, -2 * argumentvector.y / WINDOWSIZE.Y + 1);
@@ -181,12 +162,6 @@ void glVertexfloat(Vectorfloat argumentvector)
 
 void Rigidbody::physics()
 {
-    /*
-    this->velocity.x += this->accel.x * DT / 1000;
-    this->velocity.y += ((usegravity) ? this->g : 0) + this->accel.y * DT / 1000;
-    this->position.x += this->velocity.x * DT / 1000;
-    this->position.y += this->velocity.y * DT / 1000;
-    */
     cout << "this->position.y - this->scale.y / 2 = " << this->position.y - this->scale.y / 2 << endl;
 
     // y 軸方向の主要処理
@@ -240,30 +215,111 @@ void Rigidbody::physics()
     this->printf();
 }
 
+Vectorfloat vectoradd(Vectorfloat a, Vectorfloat b)
+{
+    Vectorfloat c = {a.x + b.x, a.x + a.y};
+    return c;
+}
+
 Vectorfloat vectordifference(Vectorfloat a, Vectorfloat b)
 {
     Vectorfloat c = {a.x - b.x, a.y - b.y};
     return c;
 }
 
-Vectorfloat vectorquotient(Vectorfloat a, double b)
+Vectorfloat vectorproduct(Vectorfloat a, float b)
 {
-    Vectorfloat c = {((float) a.x) / ((float) b), ((float) a.y) / ((float) b)};
+    Vectorfloat c = { a.x * b, a.y * b};
     return c;
 }
 
-// ぶつかった
-
-/*
-void registor()
+Vectorfloat vectorquotient(Vectorfloat a, float b)
 {
-    glutDisplayFunc(displayfunc);
-    glutKeyboardFunc(keyboardfunc);
-    glutMouseFunc(mousefunc);
-    glutTimerFunc(1, timerfunc, 0);
-    glutReshapeFunc(reshapefunc);
+    Vectorfloat c = {a.x / b, a.y / b};
+    return c;
 }
-*/
+
+float vectorlength2(Vectorfloat a)
+{
+    return a.x * a.x + a.y * a.y;
+}
+
+void rotationmatrix(Vectorfloat *a, Vectorfloat *A, float theta)  // ベクトルを原点周りに theta だけ回転する
+{
+    A->x = a->x * cos(theta) - a->y * sin(theta);
+    A->y = a->y * sin(theta) + a->y * cos(theta);
+}
+
+float totangent(Vectorfloat a) // ベクトルを角度に変換する
+{
+    return a.y / a.x;
+}
+
+void printrotating(Rigidbody A, Rigidbody a, Rigidbody B, Rigidbody b)
+{
+    printf("PrintRotating\n");
+    printf("Ball[1]\n");
+    A.printf();
+    printf("to\n");
+    a.printf();
+    printf("and\n");
+    printf("Ball[0]\n");
+    B.printf();
+    printf("to\n");
+    b.printf();
+}
+
+void collision(Rigidbody *A, Rigidbody *B)
+{
+    Rigidbody a = *A, b = *B;
+    printf("a\n");
+    a.printf();
+    printf("b\n");
+    b.printf();
+    Vectorfloat direction = vectordifference(a.position, b.position);   // ベクトル b -> a
+    float length2 = vectorlength2(direction);
+#if DEBUGMODE_HPP
+    printf("direction = {%5.3lf, %5.3lf}, length2 = %5.3lf\n", direction.x, direction.y, length2);
+#endif
+    if((a.r + b.r) * (a.r + b.r) < length2)
+    {
+        float tangent = totangent(direction);
+        Vectorfloat buffera, bufferb;
+        buffera = a.position;
+        bufferb = b.position;
+        // B を原点に持ってくる
+        a.position = vectordifference(a.position, b.position);
+        b.position = vectordifference(b.position, b.position);
+        // A を x 軸上に持ってくる
+        rotationmatrix(&b.position, &b.position, -tangent);
+        rotationmatrix(&a.position, &a.position, -tangent);
+        rotationmatrix(&b.velocity, &b.velocity, -tangent);
+        rotationmatrix(&a.velocity, &a.velocity, -tangent);
+        b.rotation.z += -tangent;
+        a.rotation.z += -tangent;
+        // 速度を反転させる
+#if DEBUGMODE_HPP
+        printf("tangent = %5.3lf\n", tangent);
+        printf("a.velocity = {%5.3lf, %5.3lf}\n", a.velocity.x, a.velocity.y);
+        printf("b.velocity = {%5.3lf, %5.3lf}\n", b.velocity.x, b.velocity.y);
+#endif
+        b.velocity = vectorproduct(b.velocity, -E);
+        a.velocity = vectorproduct(a.velocity, -E);
+        // A を元に戻す
+        rotationmatrix(&b.velocity, &b.velocity, tangent);
+        rotationmatrix(&a.velocity, &a.velocity, tangent);
+        rotationmatrix(&b.position, &b.position, tangent);
+        rotationmatrix(&a.position, &a.position, tangent);
+        b.rotation.z += tangent;
+        a.rotation.z += tangent;
+        // B を元に戻す
+        b.position = vectoradd(b.position, bufferb);
+        a.position = vectoradd(a.position, buffera);
+        printrotating(*A, a, *B, b);
+        *A = a;
+        *B = b;
+    }
+}
 
 
 

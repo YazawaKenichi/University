@@ -1,6 +1,6 @@
-// ボール二つ（ボール間衝突なし）
+// ボール対ボールの衝突
 
-#include <stdio.h>
+#include <stdio.h>  // どっちかに統合したい人生だった...
 #include <stdlib.h>
 #include <iostream>
 #include <GL/glut.h>
@@ -63,7 +63,6 @@ void reshapefunc(int hogehoge, int fugafuga)
 void timerfunc(int hogehoge)
 {
     // ここに物理計算を記述する
-
     // ここまで
     for(int i = 0; i < ARRAYLENGTH; i++)
     {
@@ -79,7 +78,11 @@ void timerfunc(int hogehoge)
             cout << "ball[i]->color = {" << ball[i]->color.r << ", " << ball[i]->color.g << ", " << ball[i]->color.b << " }" << endl;
 #endif
         }
-        ball[i]->physics(); // 設定された速度と加速度から座標を更新する。
+        if(ball[0]->enable && ball[1]->enable)
+        {
+            ball[i]->physics(); // 設定された速度と加速度から座標を更新する。
+            //collision(ball[1], ball[0]);
+        }
     }
 #if DEBUGMODE2
     printf("time = %4llu, miltime = %4llu\n", t.time, t.miltime);
@@ -122,6 +125,7 @@ void mousefunc(int button, int state, int argumentx, int argumenty)
                         ball[i]->accel.x = ((rand() % (20 + 1)) - 10) * 10;
                         ball[i]->position = mouse.vectorfloat;
                         ball[i]->enable = true;
+                        ball[i + 1]->position = vectorproduct(ball[i]->position, -1);
                     }
                 }
                 if(counter == 1)

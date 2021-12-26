@@ -1,7 +1,8 @@
+// ヘッダファイル
+
 #ifndef ENGINE_H
 #define ENGINE_H
 
-// #include <typeinfo> // 変数から型を推測するための関数に必要なヘッダ
 #include <GL/glut.h>
 #include <math.h>
 #include <stdbool.h>
@@ -83,7 +84,7 @@ public:
     Time();
 };
 
-class Object : public Time
+class Object
 {
 public:
     Color color;
@@ -104,6 +105,7 @@ public:
     bool wallcollision;
     bool floorcollision;
     float r;    // 外接円半径
+    float m;    // 質量
     double signedeg;
     void draw();
     void printf();  // Rigidbody の情報を見るための printf をいくつも用意した関数。デバッグ用
@@ -118,9 +120,6 @@ public:
     Rigidbody buffer;
     Ball(Vectorfloat, Quaternion, Vectorfloat);
     Ball(Vectorfloat, float);
-//    bool collided(Rigidbody);   // 相手のオブジェクトを指定する
-    // その物体と衝突しているときには true が返され、その時の相手の位置ベクトルが Vectorfloat collide に格納される。
-    // 衝突していないときは false が返され、collide の値は NULL になる。
 };
 
 class Box : public Rigidbody
@@ -128,21 +127,18 @@ class Box : public Rigidbody
 public:
     Box(Vectorfloat, Quaternion, Vectorfloat);
     Box(Vectorfloat, float);
-//    bool collided(Rigidbody);   // 相手のオブジェクトを指定する
-    // その物体と衝突しているときにはその時の相手の相対位置ベクトルが Vectorfloat collide に格納される。
-    // 衝突していないときは false が返され、collide の値は NULL になる。
 };
 
-
+float vectorlength2(Vectorfloat);
+float totangent(Vectorfloat);
+void printrotating(Rigidbody, Rigidbody, Rigidbody, Rigidbody);
 void drawing(Rigidbody);
+void rotationmatrix(Vectorfloat *, Vectorfloat *, float);
+void collision(Rigidbody *, Rigidbody *);
+Vectorfloat vectoradd(Vectorfloat, Vectorfloat);
 Vectorfloat vectordifference(Vectorfloat, Vectorfloat);
+Vectorfloat vectorproduct(Vectorfloat, float);
 Vectorfloat vectorquotient(Vectorfloat, double);
-// void physics(Rigidbody *);
-// void timerfunc(int, void *, int);
-// void reshapefunc(int, int);
-// void registor();
+
 
 #endif
-
-
-
