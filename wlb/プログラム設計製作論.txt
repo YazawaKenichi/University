@@ -1,0 +1,20 @@
+プログラム設計製作論
+scanf() でユーザに標準入力をさせる場合は一つ関数を用意して、正常な範囲の入力を受けたら true して、不正な範囲の入力を受けたら false とするようなプログラムを作る。
+正常な入力ができるまで while を用いて何度も入力させるプログラムを作る。
+bool input()
+{
+    char string[256];
+    scanf("%s", &string[0]);
+    // 入力が数列ならば
+        return true;
+    // 入力が数列でないならば
+        return false;
+}
+
+void main()
+{
+    while(more)
+    {
+        more = !input();
+    }
+}
